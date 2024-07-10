@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'pages/first_page.dart';
 import 'pages/second_page.dart';
 import 'pages/third_page.dart';
+import 'pages/new_account_page.dart';
+import 'pages/login_page.dart';
+import 'splash_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,8 +12,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,  // Disable the debug banner
-      home: OnboardingScreen(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/home': (context) => OnboardingScreen(),
+        '/new_account': (context) => NewAccountPage(),
+        '/login': (context) => LoginPage(),
+      },
     );
   }
 }

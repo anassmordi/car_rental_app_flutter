@@ -54,7 +54,7 @@ class ThirdPage extends StatelessWidget {
                 ),
                 child: TextButton(
                   onPressed: () {
-                    // Navigate to next page or perform an action
+                    Navigator.pushNamed(context, '/new_account'); // Navigate to new account page
                   },
                   child: Text(
                     'Continue',
