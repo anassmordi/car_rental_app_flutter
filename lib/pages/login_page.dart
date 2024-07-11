@@ -50,13 +50,48 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<Position?> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      showErrorDialog('Location services are disabled.');
+      return null;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        showErrorDialog('Location permissions are denied.');
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      showErrorDialog('Location permissions are permanently denied, we cannot request permissions.');
+      return null;
+    } 
+
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  }
+
   void login(String email, String password) async {
     setState(() {
       _isLoading = true; // Show loading indicator
     });
 
     try {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position? position = await _determinePosition();
+      if (position == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       final response = await http.post(
         Uri.parse('$BASE_URL/$LOGIN_URL'),
         headers: {'Content-Type': 'application/json'},
@@ -88,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       print('Error during login: $e');
-      showErrorDialog('An error occurred. Please try again.');
+      showErrorDialog('An error occurred. Please try again. Error details: $e');
     } finally {
       setState(() {
         _isLoading = false; // Hide loading indicator
