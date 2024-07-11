@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/first_page.dart';
 import 'pages/second_page.dart';
 import 'pages/third_page.dart';
 import 'pages/new_account_page.dart';
 import 'pages/login_page.dart';
 import 'splash_screen.dart';
+import 'pages/home_page.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  String? accessToken = prefs.getString('accessToken');
+  String? refreshToken = prefs.getString('refreshToken');
+
+  runApp(MyApp(
+    isLoggedIn: accessToken != null && refreshToken != null,
+  ));
+}
 
 class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  MyApp({required this.isLoggedIn});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashScreen(),
+        '/': (context) => SplashScreen(isLoggedIn: isLoggedIn),
         '/home': (context) => OnboardingScreen(),
         '/new_account': (context) => NewAccountPage(),
         '/login': (context) => LoginPage(),
+        '/homePage': (context) => HomePage(), // Home page route
       },
     );
   }
@@ -42,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _skipToLastPage() {
     _pageController.animateToPage(
       2,
-      duration: Duration(milliseconds: 150), // Faster transition
+      duration: Duration(milliseconds: 150),
       curve: Curves.easeIn,
     );
   }
@@ -71,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Row(
                   children: List.generate(3, (index) {
                     return AnimatedContainer(
-                      duration: Duration(milliseconds: 150), // Faster transition
+                      duration: Duration(milliseconds: 150),
                       margin: EdgeInsets.symmetric(horizontal: 5),
                       height: 10,
                       width: _currentPage == index ? 10 : 8,
@@ -86,7 +102,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: _skipToLastPage,
                   child: Text(
                     'Skip',
-                    style: TextStyle(color: Colors.grey), // Change skip text color
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ),
               ],
