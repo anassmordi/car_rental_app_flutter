@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../api_constants.dart'; // Ensure you have the base URL defined here
 import 'package:geolocator/geolocator.dart';
 import 'home_page.dart'; // Import the placeholder home page
+import '../services/auth_service.dart'; // Import AuthService
 
 class LoginPage extends StatefulWidget {
   @override
@@ -16,18 +17,13 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false; // Add loading state
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService(); // Instantiate AuthService
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> storeTokens(String accessToken, String refreshToken) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accessToken', accessToken);
-    await prefs.setString('refreshToken', refreshToken);
   }
 
   void showErrorDialog(String message) {
@@ -50,48 +46,13 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<Position?> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      showErrorDialog('Location services are disabled.');
-      return null;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        showErrorDialog('Location permissions are denied.');
-        return null;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      showErrorDialog('Location permissions are permanently denied, we cannot request permissions.');
-      return null;
-    } 
-
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  }
-
   void login(String email, String password) async {
     setState(() {
       _isLoading = true; // Show loading indicator
     });
 
     try {
-      Position? position = await _determinePosition();
-      if (position == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       final response = await http.post(
         Uri.parse('$BASE_URL/$LOGIN_URL'),
         headers: {'Content-Type': 'application/json'},
@@ -104,13 +65,17 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200 && data['status'] == '200') {
         String accessToken = data['accessToken'];
         String refreshToken = data['refreshToken'];
 
-        // Store tokens
-        await storeTokens(accessToken, refreshToken);
+        // Store tokens and role
+        await _authService.saveToken(accessToken, refreshToken);
+
+        // Get role from token
+        String? role = await _authService.getRole();
+        print('User role: $role');
 
         // Navigate to the home page and clear the stack
         Navigator.pushAndRemoveUntil(
@@ -123,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       print('Error during login: $e');
-      showErrorDialog('An error occurred. Please try again. Error details: $e');
+      showErrorDialog('An error occurred. Please try again.');
     } finally {
       setState(() {
         _isLoading = false; // Hide loading indicator
