@@ -18,6 +18,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: Padding(
         padding: const EdgeInsets.only(top: 40.0), // Adjust the top padding as needed
         child: Column(

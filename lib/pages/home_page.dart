@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
+    backgroundColor: Color.fromARGB(255, 255, 255, 255),
     body: Stack(
       children: [
         SingleChildScrollView(
@@ -116,6 +117,7 @@ Widget build(BuildContext context) {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
+                    
                     children: [
                       buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300/day'),
                       buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350/day'),
@@ -147,7 +149,7 @@ Widget build(BuildContext context) {
           panel: FilterSlider(),
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           minHeight: 0, // Ensure the panel starts hidden
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.84,
         ),
 
       ],
@@ -199,11 +201,19 @@ Widget build(BuildContext context) {
 
   Widget buildCarCard(String imagePath, String title, String type, String price) {
     return Padding(
-      padding: const EdgeInsets.only(right: 13.0),
+      padding: const EdgeInsets.only(right: 13.0,bottom: 10,left: 5),
       child: Container(
         width: 165,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 0.5,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
           color: Colors.white,
         ),
         child: Column(
