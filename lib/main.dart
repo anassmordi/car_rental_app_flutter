@@ -1,3 +1,4 @@
+import 'package:car_rental_app_flutter/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/first_page.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/new_account': (context) => NewAccountPage(),
         '/login': (context) => LoginPage(),
         '/homePage': (context) => HomePage(), // Home page route
+        '/profile': (context) => ProfilePage(), // Profile page route
       },
     );
   }

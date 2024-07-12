@@ -63,6 +63,12 @@ flutter:
   assets:
     - assets/mercedes-e-class-3066396_640 1.png
     - assets/logo.png
+    - assets/clio_4.png
+    - assets/citreon_c3.png
+    - assets/dacia_duster.png
+    - assets/audi_a3_sportback.png
+    - assets/mazda_3.png
+    - assets/profile_pic.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

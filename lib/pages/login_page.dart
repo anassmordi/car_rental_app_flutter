@@ -68,6 +68,18 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          showErrorDialog('Location permission is required to log in.');
+          setState(() {
+            _isLoading = false; // Hide loading indicator
+          });
+          return;
+        }
+      }
+
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       final response = await http.post(
         Uri.parse('$BASE_URL/$LOGIN_URL'),
