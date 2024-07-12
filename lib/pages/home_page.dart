@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
+import 'filter_page.dart'; // Ensure this import is added
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PanelController _panelController = PanelController();
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
@@ -14,206 +23,179 @@ class HomePage extends StatelessWidget {
       (Route<dynamic> route) => false,
     );
   }
-  Widget buildChoiceChip(String label) {
-  return ChoiceChip(
-    label: Text(label),
-    selected: false,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16.0),
-      side: BorderSide(
-        color: Colors.grey,
-      ),
-    ),
-    backgroundColor: Colors.white,
-    labelStyle: TextStyle(
-      color: Colors.black,
-      fontWeight: FontWeight.bold,
-    ),
-  );
-}
+
+      double panelPosition = -1; // Hidden position
+
+
+      void toggleFilterPanel() {
+      if (_panelController.isPanelClosed) {
+        _panelController.open();
+      } else {
+        _panelController.close();
+      }
+    }
+
+
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_on_outlined, color: Colors.black), // Added location icon
-                      SizedBox(width: 8), // Added space between icon and text
-                      Text(
-                        'Casablanca',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Icon(Icons.notifications_none, color: Colors.black), // Adjust icon color if needed
-                ],
-              ),
-      SizedBox(height: 16),
-      TextField(
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search, color: Colors.grey), // Adjust icon color
-          // Adjust icon color and use appropriate icon
-          hintText: 'Search cars by brand',
-          hintStyle: TextStyle(color: Colors.grey), // Adjust hint text color
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16.0), // Adjust border radius
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.grey[200], // Adjust fill color
-        ),
-      ),
-
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.filter_list),
-                                onPressed: () {
-                                  // Handle filter action
-                                },
-                              ),
-                              SizedBox(width: 17),  // Increased space between filter icon and first chip
-                              ChoiceChip(
-                                label: Text('Sedan'),
-                                selected: false,
-                                onSelected: (bool selected) {
-                                  // Handle chip selection
-                                },
-                              ),
-                              SizedBox(width: 17),  // Increased space between chips
-                              ChoiceChip(
-                                label: Text('Hatchback'),
-                                selected: false,
-                                onSelected: (bool selected) {
-                                  // Handle chip selection
-                                },
-                              ),
-                              SizedBox(width: 17),  // Increased space between chips
-                              ChoiceChip(
-                                label: Text('Suv'),
-                                selected: false,
-                                onSelected: (bool selected) {
-                                  // Handle chip selection
-                                },
-                              ),
-                              SizedBox(width: 17),  // Increased space between chips
-                              ChoiceChip(
-                                label: Text('Van'),
-                                selected: false,
-                                onSelected: (bool selected) {
-                                  // Handle chip selection
-                                },
-                              ),
-                              SizedBox(width: 17),  // Increased space between chips
-                              ChoiceChip(
-                                label: Text('Econonmy'),
-                                selected: false,
-                                onSelected: (bool selected) {
-                                  // Handle chip selection
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Available cars near you',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Stack(
+      children: [
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300/day'),
-                    buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350/day'),
-                    buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350/day'),
-                    buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300/day'),
-                    buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350/day'),
-                    buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350/day'),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_outlined, color: Colors.black),
+                        SizedBox(width: 8),
+                        Text(
+                          'Casablanca',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Icon(Icons.notifications_none, color: Colors.black),
                   ],
                 ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Car recommendations',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350/day'),
-              buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500/day'),
-              buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500/day'),
-              buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350/day'),
-              buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500/day'),
-              buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500/day'),
-            ],
+                SizedBox(height: 16),
+                TextField(
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    hintText: 'Search cars by brand',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.filter_list),
+                              onPressed: toggleFilterPanel,
+                            ),
+                            SizedBox(width: 17),
+                            ChoiceChip(label: Text('Sedan'), selected: false),
+                            SizedBox(width: 17),
+                            ChoiceChip(label: Text('Hatchback'), selected: false),
+                            SizedBox(width: 17),
+                            ChoiceChip(label: Text('Suv'), selected: false),
+                            SizedBox(width: 17),
+                            ChoiceChip(label: Text('Van'), selected: false),
+                            SizedBox(width: 17),
+                            ChoiceChip(label: Text('Economy'), selected: false),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Available cars near you',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300/day'),
+                      buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350/day'),
+                      buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350/day'),
+                      buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300/day'),
+                      buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350/day'),
+                      buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350/day'),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Car recommendations',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350/day'),
+                buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500/day'),
+                buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500/day'),
+                buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350/day'),
+                buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500/day'),
+                buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500/day'),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed, // Ensure labels are shown for all items
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.directions_car),
-              label: 'Cars',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Bookings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-          currentIndex: 0,
-          selectedItemColor: Colors.black, // Set color for selected item
-          unselectedItemColor: Colors.grey, // Set color for unselected items
-          backgroundColor: Colors.white, // Set background color
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacementNamed(context, '/homePage');
-                break;
-              case 1:
-                // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
-                break;
-              case 2:
-                // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
-                break;
-              case 3:
-                Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
-                break;
-            }
-          },
+                SlidingUpPanel(
+          controller: _panelController,
+          panel: FilterSlider(),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          minHeight: 0, // Ensure the panel starts hidden
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
 
+      ],
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.directions_car),
+          label: 'Cars',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.book),
+          label: 'Bookings',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
+      currentIndex: 0,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.grey,
+      backgroundColor: Colors.white,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.pushReplacementNamed(context, '/homePage');
+            break;
+          case 1:
+            // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
+            break;
+          case 2:
+            // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+            break;
+        }
+      },
+    ),
   );
 }
+
 
   Widget buildCarCard(String imagePath, String title, String type, String price) {
     return Padding(
@@ -252,7 +234,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-    Widget buildRecommendationCard(String imagePath, String title, String type, String price) {
+  Widget buildRecommendationCard(String imagePath, String title, String type, String price) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
@@ -264,7 +246,7 @@ class HomePage extends StatelessWidget {
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 1,
               blurRadius: 5,
-              offset: Offset(0, 3), // changes position of shadow
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -290,6 +272,4 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-
 }

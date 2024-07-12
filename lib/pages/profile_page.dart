@@ -19,7 +19,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(top: 55.0), // Adjust the top padding as needed
+        padding: const EdgeInsets.only(top: 40.0), // Adjust the top padding as needed
         child: Column(
           children: [
             AppBar(
@@ -64,12 +64,12 @@ class ProfilePage extends StatelessWidget {
                     ),
 
 
-                    SizedBox(height: 16),
+                    SizedBox(height: 10),
                     Text(
                       'Anass Mordi',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 6),
                     Text(
                       '3',
                       style: TextStyle(fontSize: 22, color: Colors.blue),
@@ -78,7 +78,7 @@ class ProfilePage extends StatelessWidget {
                       'Total rides',
                       style: TextStyle(fontSize: 20, color: Colors.black),
                     ),
-                    SizedBox(height: 35),
+                    SizedBox(height: 15),
                     buildProfileOption(Icons.history, 'Rides History'),
                     Divider(),
                     buildProfileOption(Icons.payment, 'Payment Methods'),
