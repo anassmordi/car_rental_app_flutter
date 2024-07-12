@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api_constants.dart'; // Correct import statement
 
 class NewAccountPage extends StatefulWidget {
@@ -47,8 +48,10 @@ class _NewAccountPageState extends State<NewAccountPage> {
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      // Handle successful registration logic here
-      print(data['message']);
+      // Store the email in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('registeredEmail', email);
+
       // Navigate to the login page
       Navigator.pushReplacementNamed(context, '/login');
     } else {

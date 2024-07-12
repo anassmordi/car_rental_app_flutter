@@ -20,6 +20,22 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService(); // Instantiate AuthService
 
   @override
+  void initState() {
+    super.initState();
+    _loadEmail();
+  }
+
+  Future<void> _loadEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? registeredEmail = prefs.getString('registeredEmail');
+    if (registeredEmail != null) {
+      _emailController.text = registeredEmail;
+      // Clear the stored email to avoid it being pre-filled in future login attempts
+      await prefs.remove('registeredEmail');
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
