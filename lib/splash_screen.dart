@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'main.dart'; // Import the main.dart file to access OnboardingScreen and HomePage
-import 'pages/home_page.dart'; // Ensure HomePage is imported
+import 'main.dart';
+import 'pages/home_page.dart';
+import 'pages/home_page_agency.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isLoggedIn;
+  final String? role;
 
-  SplashScreen({required this.isLoggedIn});
+  SplashScreen({required this.isLoggedIn, this.role});
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -39,8 +41,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          widget.isLoggedIn ? HomePage() : OnboardingScreen(),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        if (widget.isLoggedIn) {
+          return widget.role == 'AGENCY' ? HomePageAgency() : HomePage();
+        } else {
+          return OnboardingScreen();
+        }
+      },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = 0.0;
         const end = 1.0;

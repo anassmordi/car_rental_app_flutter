@@ -18,9 +18,9 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color(0xFFF8F8F8),
       body: Padding(
-        padding: const EdgeInsets.only(top: 40.0), // Adjust the top padding as needed
+        padding: const EdgeInsets.only(top: 0), // Adjust the top padding as needed
         child: Column(
           children: [
             AppBar(
@@ -30,7 +30,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              backgroundColor: Colors.transparent,
+              backgroundColor: Color(0xFFF8F8F8),
               elevation: 0,
             ),
             Expanded(

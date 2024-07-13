@@ -85,7 +85,7 @@ class _NewAccountPageState extends State<NewAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFF8F8F8),
       body: Stack(
         children: [
           SingleChildScrollView(

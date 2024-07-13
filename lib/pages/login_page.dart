@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api_constants.dart'; // Ensure you have the base URL defined here
+import '../api_constants.dart';
 import 'package:geolocator/geolocator.dart';
-import 'home_page.dart'; // Import the placeholder home page
-import '../services/auth_service.dart'; // Import AuthService
+import 'home_page.dart';
+import 'home_page_agency.dart';
+import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -14,10 +15,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _passwordVisible = false;
-  bool _isLoading = false; // Add loading state
+  bool _isLoading = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService(); // Instantiate AuthService
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -30,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
     String? registeredEmail = prefs.getString('registeredEmail');
     if (registeredEmail != null) {
       _emailController.text = registeredEmail;
-      // Clear the stored email to avoid it being pre-filled in future login attempts
       await prefs.remove('registeredEmail');
     }
   }
@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void login(String email, String password) async {
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
 
     try {
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
         if (permission == LocationPermission.denied) {
           showErrorDialog('Location permission is required to log in.');
           setState(() {
-            _isLoading = false; // Hide loading indicator
+            _isLoading = false;
           });
           return;
         }
@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
           'email': email,
           'password': password,
           'latitude': position.latitude,
-          'longitude': position.longitude
+          'longitude': position.longitude,
         }),
       );
 
@@ -98,17 +98,16 @@ class _LoginPageState extends State<LoginPage> {
         String accessToken = data['accessToken'];
         String refreshToken = data['refreshToken'];
 
-        // Store tokens and role
         await _authService.saveToken(accessToken, refreshToken);
 
-        // Get role from token
         String? role = await _authService.getRole();
         print('User role: $role');
 
-        // Navigate to the home page and clear the stack
+        Widget homePage = role == 'AGENCY' ? HomePageAgency() : HomePage();
+
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => homePage),
           (route) => false,
         );
       } else {
@@ -119,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
       showErrorDialog('An error occurred. Please try again.');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
@@ -127,11 +126,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFF8F8F8),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,

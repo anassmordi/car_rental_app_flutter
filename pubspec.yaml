@@ -80,6 +80,11 @@ flutter:
     - assets/Volvo.png
     - assets/Dacia.png
     - assets/Renault.png
+    - assets/peugeot.jpg
+    - assets/renault.jpg
+    - assets/dacia.jpg
+    - assets/volkswagen.jpg
+    - assets/toyota.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

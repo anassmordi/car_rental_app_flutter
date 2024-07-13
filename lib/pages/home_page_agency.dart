@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-import 'filter_page.dart'; // Ensure this import is added
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'details_page.dart'; // Import the new DetailsPage
 
-class HomePage extends StatefulWidget {
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+
+class HomePageAgency extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageAgencyState createState() => _HomePageAgencyState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageAgencyState extends State<HomePageAgency> {
   final PanelController _panelController = PanelController();
 
   Future<void> logout(BuildContext context) async {
@@ -27,13 +27,13 @@ class _HomePageState extends State<HomePage> {
 
   double panelPosition = -1; // Hidden position
 
-  void toggleFilterPanel() {
-    if (_panelController.isPanelClosed) {
-      _panelController.open();
-    } else {
-      _panelController.close();
-    }
-  }
+  // void toggleFilterPanel() {
+  //   if (_panelController.isPanelClosed) {
+  //     _panelController.open();
+  //   } else {
+  //     _panelController.close();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +85,10 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              IconButton(
-                                icon: Icon(Icons.filter_list),
-                                onPressed: toggleFilterPanel,
-                              ),
+                              // IconButton(
+                              //   icon: Icon(Icons.filter_list),
+                              //   // onPressed: toggleFilterPanel,
+                              // ),
                               SizedBox(width: 17),
                               ChoiceChip(label: Text('Sedan'), selected: false),
                               SizedBox(width: 17),
@@ -107,47 +107,34 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 24),
                   Text(
-                    'Available cars near you',
+                    'Added Cars',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300'),
-                        buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300'),
-                        buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350'),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'Car recommendations',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
-                  buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
+                  buildAddedCarCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
+                  buildAddedCarCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
+                  buildAddedCarCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
+                  buildAddedCarCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
+                  buildAddedCarCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
                 ],
               ),
             ),
           ),
-          SlidingUpPanel(
-            controller: _panelController,
-            panel: FilterSlider(),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            minHeight: 0, // Ensure the panel starts hidden
-            maxHeight: MediaQuery.of(context).size.height * 0.84,
-          ),
+          // SlidingUpPanel(
+          //   controller: _panelController,
+          //   panel: ,
+          //   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          //   minHeight: 0, // Ensure the panel starts hidden
+          //   maxHeight: MediaQuery.of(context).size.height * 0.84,
+          // ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add car action
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -176,7 +163,7 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, '/homePage');
+              Navigator.pushReplacementNamed(context, '/homePageAgency');
               break;
             case 1:
               // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
@@ -185,7 +172,7 @@ class _HomePageState extends State<HomePage> {
               // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
               break;
             case 3:
-              Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+              // Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
               break;
           }
         },
@@ -193,80 +180,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildCarCard(String imagePath, String title, String type, String price) {
+  Widget buildAddedCarCard(String imagePath, String title, String type, String price) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
-            ),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(right: 13.0, bottom: 10, left: 5),
-        child: Container(
-          width: 165,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 0.5,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
-            color: Colors.white,
-          ),
-          child: Column(
-            children: [
-              Image.asset(imagePath, height: 95, fit: BoxFit.contain),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      type,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    SizedBox(height: 4),
-                    Text('$price/day', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildRecommendationCard(String imagePath, String title, String type, String price) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
-            ),
-          ),
-        );
+        
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
@@ -299,6 +216,23 @@ class _HomePageState extends State<HomePage> {
                 Text(type, style: TextStyle(fontSize: 16)),
                 SizedBox(height: 3),
                 Text('$price/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () {
+                    // Edit car action
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    // Delete car action
+                  },
+                ),
               ],
             ),
           ),

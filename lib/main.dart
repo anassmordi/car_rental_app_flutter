@@ -8,36 +8,47 @@ import 'pages/new_account_page.dart';
 import 'pages/login_page.dart';
 import 'splash_screen.dart';
 import 'pages/home_page.dart';
+import 'pages/details_page.dart';
+import 'pages/home_page_agency.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   String? accessToken = prefs.getString('accessToken');
   String? refreshToken = prefs.getString('refreshToken');
+  String? role = prefs.getString('userRole');
 
   runApp(MyApp(
     isLoggedIn: accessToken != null && refreshToken != null,
+    role: role,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
+  final String? role;
 
-  MyApp({required this.isLoggedIn});
+  MyApp({required this.isLoggedIn, this.role});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashScreen(isLoggedIn: isLoggedIn),
+        '/': (context) => SplashScreen(isLoggedIn: isLoggedIn, role: role),
         '/home': (context) => OnboardingScreen(),
         '/new_account': (context) => NewAccountPage(),
         '/login': (context) => LoginPage(),
-        '/homePage': (context) => HomePage(), // Home page route
-        '/profile': (context) => ProfilePage(), // Profile page route
+        '/homePage': (context) => HomePage(),
+        '/profile': (context) => ProfilePage(),
+        '/details': (context) => DetailsPage(
+          imagePath: '',
+          title: '',
+          type: '',
+          price: '',
+        ),
+        '/homePageAgency': (context) => HomePageAgency(),
       },
     );
   }
