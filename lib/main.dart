@@ -10,6 +10,8 @@ import 'splash_screen.dart';
 import 'pages/home_page.dart';
 import 'pages/details_page.dart';
 import 'pages/home_page_agency.dart';
+import 'pages/profile_page_agency.dart';
+import 'pages/details_page_agency.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +51,15 @@ class MyApp extends StatelessWidget {
           price: '',
         ),
         '/homePageAgency': (context) => HomePageAgency(),
+        '/profileAgency': (context) => ProfilePageAgency(),
+        '/detailsAgency': (context) => DetailsPageAgency( 
+          imagePath: '',
+          title: '',
+          type: '',
+          price: '',
+        ),
       },
+      
     );
   }
 }

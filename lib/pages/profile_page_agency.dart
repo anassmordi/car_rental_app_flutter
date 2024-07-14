@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart'; // Add import for LoginPage
 
-class ProfilePage extends StatelessWidget {
+class ProfilePageAgency extends StatelessWidget {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
@@ -44,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 70,
-                          backgroundImage: AssetImage('assets/profile_pic.jpg'),
+                          backgroundImage: AssetImage('assets/agency_pfp.jpg'),
                         ),
                         Positioned(
                           bottom: 0,
@@ -67,26 +67,24 @@ class ProfilePage extends StatelessWidget {
 
                     SizedBox(height: 10),
                     Text(
-                      'Anass Mordi',
+                      'Agency Name',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 6),
                     Text(
-                      '3',
+                      '5',
                       style: TextStyle(fontSize: 22, color: Colors.blue),
                     ),
                     Text(
-                      'Total rides',
+                      'Total bookings',
                       style: TextStyle(fontSize: 20, color: Colors.black),
                     ),
                     SizedBox(height: 15),
-                    buildProfileOption(Icons.history, 'Rides History'),
+                    buildProfileOption(Icons.history, 'Booking History'),
                     Divider(),
                     buildProfileOption(Icons.payment, 'Payment Methods'),
                     Divider(),
                     buildProfileOption(Icons.privacy_tip, 'Privacy Policy'),
-                    Divider(),
-                    buildProfileOption(Icons.car_rental, 'Become a Renter'),
                     Divider(),
                     ListTile(
                       leading: Icon(Icons.logout, color: Colors.black),
@@ -129,13 +127,13 @@ class ProfilePage extends StatelessWidget {
         currentIndex: 3, // Set to Profile
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/homePage');
+            Navigator.pushReplacementNamed(context, '/homePageAgency');
           } else if (index == 1) {
             // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
           } else if (index == 2) {
             // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
           } else if (index == 3) {
-            Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+            Navigator.pushNamed(context, '/profileAgency'); // Navigate to ProfilePageAgency
           }
         },
       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-
+import 'filter_page_agency.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-
+import 'details_page_agency.dart'; // Import the new DetailsPageAgency
 
 class HomePageAgency extends StatefulWidget {
   @override
@@ -27,13 +27,13 @@ class _HomePageAgencyState extends State<HomePageAgency> {
 
   double panelPosition = -1; // Hidden position
 
-  // void toggleFilterPanel() {
-  //   if (_panelController.isPanelClosed) {
-  //     _panelController.open();
-  //   } else {
-  //     _panelController.close();
-  //   }
-  // }
+  void toggleFilterPanel() {
+    if (_panelController.isPanelClosed) {
+      _panelController.open();
+    } else {
+      _panelController.close();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +85,10 @@ class _HomePageAgencyState extends State<HomePageAgency> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              // IconButton(
-                              //   icon: Icon(Icons.filter_list),
-                              //   // onPressed: toggleFilterPanel,
-                              // ),
+                              IconButton(
+                                icon: Icon(Icons.filter_list),
+                                onPressed: toggleFilterPanel,
+                              ),
                               SizedBox(width: 17),
                               ChoiceChip(label: Text('Sedan'), selected: false),
                               SizedBox(width: 17),
@@ -120,13 +120,13 @@ class _HomePageAgencyState extends State<HomePageAgency> {
               ),
             ),
           ),
-          // SlidingUpPanel(
-          //   controller: _panelController,
-          //   panel: ,
-          //   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          //   minHeight: 0, // Ensure the panel starts hidden
-          //   maxHeight: MediaQuery.of(context).size.height * 0.84,
-          // ),
+          SlidingUpPanel(
+            controller: _panelController,
+            panel: FilterSliderAgency(),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            minHeight: 0, // Ensure the panel starts hidden
+            maxHeight: MediaQuery.of(context).size.height * 0.84,
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -172,7 +172,7 @@ class _HomePageAgencyState extends State<HomePageAgency> {
               // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
               break;
             case 3:
-              // Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+              Navigator.pushNamed(context, '/profileAgency'); // Navigate to ProfilePage
               break;
           }
         },
@@ -183,7 +183,17 @@ class _HomePageAgencyState extends State<HomePageAgency> {
   Widget buildAddedCarCard(String imagePath, String title, String type, String price) {
     return GestureDetector(
       onTap: () {
-        
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailsPageAgency(
+              imagePath: imagePath,
+              title: title,
+              type: type,
+              price: price,
+            ),
+          ),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
