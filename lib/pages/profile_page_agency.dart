@@ -25,7 +25,7 @@ class ProfilePageAgency extends StatelessWidget {
           children: [
             AppBar(
               centerTitle: true,
-              title: Text('Profile', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 28)),
+              title: Text('Profile', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop(),

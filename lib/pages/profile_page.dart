@@ -1,6 +1,8 @@
+import 'package:bghit_nsog/pages/car_recommendations_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login_page.dart'; // Add import for LoginPage
+import 'login_page.dart'; 
+import 'ride_history_page.dart'; // Import the Ride History page
 
 class ProfilePage extends StatelessWidget {
   Future<void> logout(BuildContext context) async {
@@ -18,14 +20,14 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFF8F8F8),
+      backgroundColor: Color(0xFFF8F8F8),
       body: Padding(
         padding: const EdgeInsets.only(top: 0), // Adjust the top padding as needed
         child: Column(
           children: [
             AppBar(
               centerTitle: true,
-              title: Text('Profile', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontSize: 28)),
+              title: Text('Profile', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop(),
@@ -38,65 +40,62 @@ class ProfilePage extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 40),
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 70,
-                          backgroundImage: AssetImage('assets/profile_pic.jpg'),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              // Handle pen icon tap
-                              // print("Pen icon tapped");
-                            },
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Color.fromARGB(255, 235, 235, 235),
-                              child: Icon(Icons.edit, color: Colors.black),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 70,
+                            backgroundImage: AssetImage('assets/profile_pic.jpg'),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () {
+                                // Handle pen icon tap
+                                // print("Pen icon tapped");
+                              },
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Color.fromARGB(255, 235, 235, 235),
+                                child: Icon(Icons.edit, color: Colors.black),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-
-                    SizedBox(height: 10),
-                    Text(
-                      'Anass Mordi',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      '3',
-                      style: TextStyle(fontSize: 22, color: Colors.blue),
-                    ),
-                    Text(
-                      'Total rides',
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                    ),
-                    SizedBox(height: 15),
-                    buildProfileOption(Icons.history, 'Rides History'),
-                    Divider(),
-                    buildProfileOption(Icons.payment, 'Payment Methods'),
-                    Divider(),
-                    buildProfileOption(Icons.privacy_tip, 'Privacy Policy'),
-                    Divider(),
-                    buildProfileOption(Icons.car_rental, 'Become a Renter'),
-                    Divider(),
-                    ListTile(
-                      leading: Icon(Icons.logout, color: Colors.black),
-                      title: Text('Logout', style: TextStyle(fontSize: 18)),
-                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.black),
-                      onTap: () => logout(context),
-                    ),
-                  ],
-                )
-
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Anass Mordi',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        '3',
+                        style: TextStyle(fontSize: 22, color: Colors.blue),
+                      ),
+                      Text(
+                        'Total rides',
+                        style: TextStyle(fontSize: 20, color: Colors.black),
+                      ),
+                      SizedBox(height: 15),
+                      buildProfileOption(Icons.history, 'Rides History', context),
+                      Divider(),
+                      buildProfileOption(Icons.payment, 'Payment Methods', context),
+                      Divider(),
+                      buildProfileOption(Icons.privacy_tip, 'Privacy Policy', context),
+                      Divider(),
+                      buildProfileOption(Icons.car_rental, 'Become a Renter', context),
+                      Divider(),
+                      ListTile(
+                        leading: Icon(Icons.logout, color: Colors.black),
+                        title: Text('Logout', style: TextStyle(fontSize: 18)),
+                        trailing: Icon(Icons.arrow_forward_ios, color: Colors.black),
+                        onTap: () => logout(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -131,18 +130,21 @@ class ProfilePage extends StatelessWidget {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/homePage');
           } else if (index == 1) {
-            // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
+             Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
+              ); // Add this route if it exists
           } else if (index == 2) {
-            // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
+            Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
           } else if (index == 3) {
-            Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+            // Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
           }
         },
       ),
     );
   }
 
-  Widget buildProfileOption(IconData icon, String title) {
+  Widget buildProfileOption(IconData icon, String title, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3.0),
       child: ListTile(
@@ -150,7 +152,14 @@ class ProfilePage extends StatelessWidget {
         title: Text(title, style: TextStyle(fontSize: 18)),
         trailing: Icon(Icons.arrow_forward_ios, color: Colors.black),
         onTap: () {
-          // Handle option tap
+          if (title == 'Rides History') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RideHistoryPage()),
+            );
+          } else {
+            // Handle other options if needed
+          }
         },
       ),
     );

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'results_page.dart';
 
 class FilterSlider extends StatefulWidget {
+  final ScrollController scrollController;
+
+  FilterSlider({required this.scrollController});
+
   @override
   _FilterSliderState createState() => _FilterSliderState();
 }
@@ -22,6 +27,15 @@ class _FilterSliderState extends State<FilterSlider> {
     });
   }
 
+  void applyFilters() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,6 +53,7 @@ class _FilterSliderState extends State<FilterSlider> {
         ],
       ),
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,44 +75,43 @@ class _FilterSliderState extends State<FilterSlider> {
             ),
             SizedBox(height: 20),
             Text('Brands', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-           SizedBox(height: 16),
-SingleChildScrollView(
-  scrollDirection: Axis.horizontal,
-  child: Row(
-    children: [
-      buildCustomChip('BMW', 'assets/BMW.png', selectedBrand == 'BMW', () {
-        setState(() {
-          selectedBrand = 'BMW';
-        });
-      }),
-      SizedBox(width: 12), // Space between chips
-      buildCustomChip('Mercedes', 'assets/Mercedes.png', selectedBrand == 'Mercedes', () {
-        setState(() {
-          selectedBrand = 'Mercedes';
-        });
-      }),
-      SizedBox(width: 12), // Space between chips
-      buildCustomChip('Volvo', 'assets/Volvo.png', selectedBrand == 'Volvo', () {
-        setState(() {
-          selectedBrand = 'Volvo';
-        });
-      }),
-      SizedBox(width: 12), // Space between chips
-      buildCustomChip('Dacia', 'assets/Dacia.png', selectedBrand == 'Dacia', () {
-        setState(() {
-          selectedBrand = 'Dacia';
-        });
-      }),
-      SizedBox(width: 12), // Space between chips
-      buildCustomChip('Renault', 'assets/Renault.png', selectedBrand == 'Renault', () {
-        setState(() {
-          selectedBrand = 'Renault';
-        });
-      }),
-    ],
-  ),
-),
-
+            SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  buildCustomChip('BMW', 'assets/BMW.png', selectedBrand == 'BMW', () {
+                    setState(() {
+                      selectedBrand = 'BMW';
+                    });
+                  }),
+                  SizedBox(width: 12), // Space between chips
+                  buildCustomChip('Mercedes', 'assets/Mercedes.png', selectedBrand == 'Mercedes', () {
+                    setState(() {
+                      selectedBrand = 'Mercedes';
+                    });
+                  }),
+                  SizedBox(width: 12), // Space between chips
+                  buildCustomChip('Volvo', 'assets/Volvo.png', selectedBrand == 'Volvo', () {
+                    setState(() {
+                      selectedBrand = 'Volvo';
+                    });
+                  }),
+                  SizedBox(width: 12), // Space between chips
+                  buildCustomChip('Dacia', 'assets/Dacia.png', selectedBrand == 'Dacia', () {
+                    setState(() {
+                      selectedBrand = 'Dacia';
+                    });
+                  }),
+                  SizedBox(width: 12), // Space between chips
+                  buildCustomChip('Renault', 'assets/Renault.png', selectedBrand == 'Renault', () {
+                    setState(() {
+                      selectedBrand = 'Renault';
+                    });
+                  }),
+                ],
+              ),
+            ),
             SizedBox(height: 30),
             Text('Model', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             DropdownButton<String>(
@@ -241,7 +255,7 @@ SingleChildScrollView(
                       style: TextStyle(
                         color: Color(0xFF4550AA),
                         fontWeight: FontWeight.bold,
-                        fontSize: 20
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -249,7 +263,7 @@ SingleChildScrollView(
                 SizedBox(width: 35),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: applyFilters,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF4550AA),
                       shape: RoundedRectangleBorder(
@@ -262,7 +276,7 @@ SingleChildScrollView(
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -280,7 +294,6 @@ SingleChildScrollView(
       onTap: onSelected,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        // height: 60,
         width: 90,
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,
@@ -298,3 +311,4 @@ SingleChildScrollView(
     );
   }
 }
+  

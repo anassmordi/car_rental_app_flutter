@@ -49,7 +49,7 @@ class ThirdPage extends StatelessWidget {
                 height: 50,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Color(0xFF3B5998), // Use the exact color as provided
+                  color: Color(0xFF4550AA), // Use the exact color as provided
                   borderRadius: BorderRadius.circular(5), // Keep the original radius
                 ),
                 child: TextButton(

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class FilterSliderAgency extends StatefulWidget {
+  final ScrollController scrollController;
+
+  FilterSliderAgency({required this.scrollController});
+
   @override
   _FilterSliderAgencyState createState() => _FilterSliderAgencyState();
 }
@@ -39,6 +43,7 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
         ],
       ),
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +245,7 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
                       style: TextStyle(
                         color: Color(0xFF4550AA),
                         fontWeight: FontWeight.bold,
-                        fontSize: 20
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -261,7 +266,7 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20
+                        fontSize: 20,
                       ),
                     ),
                   ),
@@ -279,7 +284,6 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
       onTap: onSelected,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        // height: 60,
         width: 90,
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,

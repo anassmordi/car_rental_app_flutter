@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-import 'filter_page.dart'; // Ensure this import is added
+import 'filter_page.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'details_page.dart'; // Import the new DetailsPage
+import 'details_page.dart';
+import 'car_recommendations_page.dart'; // Import the new page
 
 class HomePage extends StatefulWidget {
   @override
@@ -25,8 +26,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  double panelPosition = -1; // Hidden position
-
   void toggleFilterPanel() {
     if (_panelController.isPanelClosed) {
       _panelController.open();
@@ -43,7 +42,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 45, horizontal: 28),
+              padding: const EdgeInsets.symmetric(vertical: 55, horizontal: 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -80,25 +79,55 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 16),
                   Row(
                     children: [
+                      IconButton(
+                        icon: Icon(Icons.filter_list),
+                        onPressed: toggleFilterPanel,
+                      ),
+                      SizedBox(width: 17),
                       Expanded(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              IconButton(
-                                icon: Icon(Icons.filter_list),
-                                onPressed: toggleFilterPanel,
+                              ChoiceChip(
+                                label: Text('Sedan'),
+                                selected: false,
+                                backgroundColor: Color(0xFFF8F8F8),
+                                selectedColor: Color(0xFFF8F8F8),
+                                disabledColor: Color(0xFFF8F8F8),
                               ),
                               SizedBox(width: 17),
-                              ChoiceChip(label: Text('Sedan'), selected: false),
+                              ChoiceChip(
+                                label: Text('Hatchback'),
+                                selected: false,
+                                backgroundColor: Color(0xFFF8F8F8),
+                                selectedColor: Color(0xFFF8F8F8),
+                                disabledColor: Color(0xFFF8F8F8),
+                              ),
                               SizedBox(width: 17),
-                              ChoiceChip(label: Text('Hatchback'), selected: false),
+                              ChoiceChip(
+                                label: Text('Suv'),
+                                selected: false,
+                                backgroundColor: Color(0xFFF8F8F8),
+                                selectedColor: Color(0xFFF8F8F8),
+                                disabledColor: Color(0xFFF8F8F8),
+                              ),
                               SizedBox(width: 17),
-                              ChoiceChip(label: Text('Suv'), selected: false),
+                              ChoiceChip(
+                                label: Text('Van'),
+                                selected: false,
+                                backgroundColor: Color(0xFFF8F8F8),
+                                selectedColor: Color(0xFFF8F8F8),
+                                disabledColor: Color(0xFFF8F8F8),
+                              ),
                               SizedBox(width: 17),
-                              ChoiceChip(label: Text('Van'), selected: false),
-                              SizedBox(width: 17),
-                              ChoiceChip(label: Text('Economy'), selected: false),
+                              ChoiceChip(
+                                label: Text('Economy'),
+                                selected: false,
+                                backgroundColor: Color(0xFFF8F8F8),
+                                selectedColor: Color(0xFFF8F8F8),
+                                disabledColor: Color(0xFFF8F8F8),
+                              ),
                             ],
                           ),
                         ),
@@ -142,10 +171,14 @@ class _HomePageState extends State<HomePage> {
           ),
           SlidingUpPanel(
             controller: _panelController,
-            panel: FilterSlider(),
+            panelBuilder: (scrollController) => FilterSlider(
+              scrollController: scrollController,
+            ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             minHeight: 0, // Ensure the panel starts hidden
             maxHeight: MediaQuery.of(context).size.height * 0.84,
+            backdropEnabled: true,
+            backdropTapClosesPanel: true,
           ),
         ],
       ),
@@ -176,13 +209,16 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, '/homePage');
+              // Navigator.pushReplacementNamed(context, '/homePage');
               break;
             case 1:
-              // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
+              );
               break;
             case 2:
-              // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
+              Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
               break;
             case 3:
               Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage

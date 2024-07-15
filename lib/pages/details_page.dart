@@ -25,7 +25,7 @@ class DetailsPage extends StatelessWidget {
         ),
         backgroundColor: Color(0xFFF8F8F8),
         elevation: 0,
-        title: Text('Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 28)),
+        title: Text('Details', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

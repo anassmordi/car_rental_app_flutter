@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'filter_page_agency.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'details_page_agency.dart'; // Import the new DetailsPageAgency
+import 'details_page_agency.dart';
 
 class HomePageAgency extends StatefulWidget {
   @override
@@ -25,8 +25,6 @@ class _HomePageAgencyState extends State<HomePageAgency> {
     );
   }
 
-  double panelPosition = -1; // Hidden position
-
   void toggleFilterPanel() {
     if (_panelController.isPanelClosed) {
       _panelController.open();
@@ -43,7 +41,7 @@ class _HomePageAgencyState extends State<HomePageAgency> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 45, horizontal: 28),
+              padding: const EdgeInsets.symmetric(vertical: 55, horizontal: 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -56,7 +54,7 @@ class _HomePageAgencyState extends State<HomePageAgency> {
                           SizedBox(width: 8),
                           Text(
                             'Casablanca',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24),
                           ),
                         ],
                       ),
@@ -122,10 +120,14 @@ class _HomePageAgencyState extends State<HomePageAgency> {
           ),
           SlidingUpPanel(
             controller: _panelController,
-            panel: FilterSliderAgency(),
+            panelBuilder: (ScrollController scrollController) => FilterSliderAgency(
+              scrollController: scrollController,
+            ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             minHeight: 0, // Ensure the panel starts hidden
             maxHeight: MediaQuery.of(context).size.height * 0.84,
+            backdropEnabled: true,
+            backdropTapClosesPanel: true,
           ),
         ],
       ),

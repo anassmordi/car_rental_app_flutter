@@ -12,6 +12,11 @@ import 'pages/details_page.dart';
 import 'pages/home_page_agency.dart';
 import 'pages/profile_page_agency.dart';
 import 'pages/details_page_agency.dart';
+import 'pages/results_page.dart';
+import 'pages/ride_history_page.dart'; 
+
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +41,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: Color(0xFFF8F8F8),
+      ),
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(isLoggedIn: isLoggedIn, role: role),
@@ -58,8 +66,9 @@ class MyApp extends StatelessWidget {
           type: '',
           price: '',
         ),
+        '/results': (context) => ResultsPage(),
+        '/rideHistory': (context) => RideHistoryPage(),
       },
-      
     );
   }
 }
