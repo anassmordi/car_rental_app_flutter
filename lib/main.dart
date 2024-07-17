@@ -1,4 +1,3 @@
-import 'package:bghit_nsog/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/first_page.dart';
@@ -13,15 +12,12 @@ import 'pages/home_page_agency.dart';
 import 'pages/profile_page_agency.dart';
 import 'pages/details_page_agency.dart';
 import 'pages/results_page.dart';
-import 'pages/ride_history_page.dart'; 
+import 'pages/ride_history_page.dart';
 import 'pages/registration_page.dart';
-import 'package:bghit_nsog/pages/test_add_car_page.dart'; 
-import 'package:bghit_nsog/pages/become_agency_page.dart';
-import 'pages/agency_cars_page.dart'; 
-
-
-
-
+import 'pages/test_add_car_page.dart';
+import 'pages/become_agency_page.dart';
+import 'pages/agency_cars_page.dart';
+import 'pages/profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,20 +54,16 @@ class MyApp extends StatelessWidget {
         '/homePage': (context) => HomePage(),
         '/profile': (context) => ProfilePage(),
         '/details': (context) => DetailsPage(
-          imagePath: '',
-          title: '',
-          type: '',
-          price: '',
+          carId: '',
         ),
         '/homePageAgency': (context) => HomePageAgency(),
         '/profileAgency': (context) => ProfilePageAgency(),
-        '/detailsAgency': (context) => DetailsPageAgency( 
+        '/detailsAgency': (context) => DetailsPageAgency(
           imagePath: '',
           title: '',
           type: '',
           price: '',
         ),
-        '/results': (context) => ResultsPage(),
         '/rideHistory': (context) => RideHistoryPage(),
         '/registration': (context) => RegistrationPage(),
         '/testAddCar': (context) => TestAddCarPage(),

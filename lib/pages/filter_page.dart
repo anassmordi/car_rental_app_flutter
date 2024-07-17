@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'results_page.dart';
+import 'package:bghit_nsog/api_constants.dart';
 
 class FilterSlider extends StatefulWidget {
   final ScrollController scrollController;
@@ -12,6 +16,7 @@ class FilterSlider extends StatefulWidget {
 
 class _FilterSliderState extends State<FilterSlider> {
   String selectedBrand = '';
+  String selectedModel = '';
   String selectedType = '';
   String selectedTransmission = '';
   String selectedFuel = '';
@@ -20,6 +25,7 @@ class _FilterSliderState extends State<FilterSlider> {
   void clearAllSelections() {
     setState(() {
       selectedBrand = '';
+      selectedModel = '';
       selectedType = '';
       selectedTransmission = '';
       selectedFuel = '';
@@ -27,14 +33,64 @@ class _FilterSliderState extends State<FilterSlider> {
     });
   }
 
-  void applyFilters() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(),
-      ),
+  Future<void> applyFilters() async {
+  final prefs = await SharedPreferences.getInstance();
+  final accessToken = prefs.getString('accessToken');
+
+  final url = Uri.parse('$BASE_URL/api/cars/search');
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $accessToken',
+  };
+
+  final body = <String, dynamic>{};
+  if (selectedBrand.isNotEmpty) body['make'] = selectedBrand;
+  if (selectedModel.isNotEmpty) body['model'] = selectedModel;
+  if (selectedType.isNotEmpty) body['type'] = selectedType;
+  if (selectedTransmission.isNotEmpty) body['transmissionType'] = selectedTransmission;
+  if (selectedFuel.isNotEmpty) body['fuelType'] = selectedFuel;
+  if (priceRange > 250) body['minPrice'] = priceRange;
+
+  // Log the request body
+  print('Request body: $body');
+
+  try {
+    final response = await http.post(url, headers: headers, body: jsonEncode(body));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final searchResult = data['searchResult'] ?? [];
+
+      // Split search results into cars with promotions and other cars
+      final carsWithPromotions = searchResult.where((car) => car['promotion'] == true).toList();
+      final otherCars = searchResult.where((car) => car['promotion'] == false).toList();
+
+      // Log the full API response
+      print('Full API response: $data');
+      print('Fetched cars with promotions: $carsWithPromotions');
+      print('Fetched other cars: $otherCars');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsPage(
+            carsWithPromotions: carsWithPromotions,
+            otherCars: otherCars,
+          ),
+        ),
+      );
+    } else {
+      final data = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['message'])),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('An error occurred. Please try again.')),
     );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -117,13 +173,18 @@ class _FilterSliderState extends State<FilterSlider> {
             DropdownButton<String>(
               isExpanded: true,
               hint: Text('Select car model'),
+              value: selectedModel.isNotEmpty ? selectedModel : null,
               items: <String>['Model A', 'Model B', 'Model C'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
                 );
               }).toList(),
-              onChanged: (_) {},
+              onChanged: (value) {
+                setState(() {
+                  selectedModel = value!;
+                });
+              },
             ),
             SizedBox(height: 30),
             Text('Types', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
@@ -311,4 +372,3 @@ class _FilterSliderState extends State<FilterSlider> {
     );
   }
 }
-  

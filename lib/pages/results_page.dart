@@ -2,15 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'details_page.dart';
 import 'filter_page.dart';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:path/path.dart' as p;
 
 class ResultsPage extends StatelessWidget {
   final PanelController _panelController = PanelController();
+  final List<dynamic> carsWithPromotions;
+  final List<dynamic> otherCars;
+
+  ResultsPage({required this.carsWithPromotions, required this.otherCars});
 
   void toggleFilterPanel(BuildContext context) {
     if (_panelController.isPanelClosed) {
       _panelController.open();
     } else {
       _panelController.close();
+    }
+  }
+
+  Future<Uint8List> _fetchImage(String imageName) async {
+    try {
+      final correctedImageName = imageName.replaceFirst(RegExp(r'^images\\cars\\'), '');
+      final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+      final file = File(filePath);
+      if (await file.exists()) {
+        return file.readAsBytes();
+      } else {
+        throw Exception('Image not found');
+      }
+    } catch (e) {
+      throw Exception('Failed to load image');
     }
   }
 
@@ -29,7 +51,7 @@ class ResultsPage extends StatelessWidget {
         ),
         title: Text(
           'Results',
-          style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24),
         ),
         centerTitle: true,
         actions: [
@@ -54,50 +76,43 @@ class ResultsPage extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Container(
-                    height: 220,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        buildOfferCard(
+                  if (carsWithPromotions.isNotEmpty)
+                    Container(
+                      height: 220,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: carsWithPromotions.map((car) => buildOfferCard(
                           context,
-                          'assets/clio_4.png',
-                          'Renault Clio 4',
-                          'Hatchback',
-                          'MAD300',
-                          '20%',
-                        ),
-                        buildOfferCard(
-                          context,
-                          'assets/citreon_c3.png',
-                          'Citroen C3',
-                          'Sedan',
-                          'MAD350',
-                          '20%',
-                        ),
-                        buildOfferCard(
-                          context,
-                          'assets/dacia_duster.png',
-                          'Dacia Duster',
-                          'Sedan',
-                          'MAD350',
-                          '20%',
-                        ),
-                      ],
-                    ),
-                  ),
+                          car['id'],
+                          car['imageFileNames'][0],
+                          car['make'] + ' ' + car['model'],
+                          car['type'],
+                          'MAD${car['price']}',
+                          '${car['percentage']}%',
+                        )).toList(),
+                      ),
+                    )
+                  else
+                    Text('No special offers available'),
                   SizedBox(height: 16),
                   Text(
                     'Filter results',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  buildRecommendationCard(context, 'assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard(context, 'assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard(context, 'assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
-                  buildRecommendationCard(context, 'assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard(context, 'assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard(context, 'assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
+                  if (otherCars.isNotEmpty)
+                    Column(
+                      children: otherCars.map((car) => buildRecommendationCard(
+                        context,
+                        car['id'],
+                        car['imageFileNames'][0],
+                        car['make'] + ' ' + car['model'],
+                        car['type'],
+                        'MAD${car['price']}',
+                      )).toList(),
+                    )
+                  else
+                    Text('No results found'),
                 ],
               ),
             ),
@@ -120,23 +135,22 @@ class ResultsPage extends StatelessWidget {
 
   Widget buildOfferCard(
     BuildContext context,
+    String carId,
     String imagePath,
     String title,
     String type,
     String price,
     String discount,
   ) {
+    final correctedImageName = imagePath.replaceFirst(RegExp(r'^images\\cars\\'), '');
+    final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
-            ),
+            builder: (context) => DetailsPage(carId: carId), // Pass only carId
           ),
         );
       },
@@ -161,7 +175,18 @@ class ResultsPage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(child: Image.asset(imagePath, height: 100, width: 150, fit: BoxFit.contain)),
+                  Center(child: FutureBuilder<Uint8List>(
+                    future: _fetchImage(imagePath),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Icon(Icons.error);
+                      } else {
+                        return Image.memory(snapshot.data!, height: 100, width: 150, fit: BoxFit.contain);
+                      }
+                    },
+                  )),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -199,18 +224,16 @@ class ResultsPage extends StatelessWidget {
     );
   }
 
-  Widget buildRecommendationCard(BuildContext context, String imagePath, String title, String type, String price) {
+  Widget buildRecommendationCard(BuildContext context, String carId, String imagePath, String title, String type, String price) {
+    final correctedImageName = imagePath.replaceFirst(RegExp(r'^images\\cars\\'), '');
+    final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
-            ),
+            builder: (context) => DetailsPage(carId: carId), // Pass only carId
           ),
         );
       },
@@ -231,7 +254,18 @@ class ResultsPage extends StatelessWidget {
           ),
           child: ListTile(
             contentPadding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0),
-            leading: Image.asset(imagePath, width: 100, height: 60, fit: BoxFit.contain),
+            leading: FutureBuilder<Uint8List>(
+              future: _fetchImage(imagePath),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Icon(Icons.error);
+                } else {
+                  return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
+                }
+              },
+            ),
             title: Text(
               title,
               style: TextStyle(

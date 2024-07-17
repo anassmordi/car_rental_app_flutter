@@ -245,10 +245,7 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
+              carId: "4",
             ),
           ),
         );
@@ -305,10 +302,11 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
+              // imagePath: imagePath,
+              // title: title,
+              // type: type,
+              // price: price,
+              carId: "4",
             ),
           ),
         );

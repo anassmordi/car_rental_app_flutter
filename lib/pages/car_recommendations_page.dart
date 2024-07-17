@@ -89,10 +89,11 @@ class CarRecommendationsPage extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              imagePath: imagePath,
-              title: title,
-              type: type,
-              price: price,
+              // imagePath: imagePath,
+              // title: title,
+              // type: type,
+              // price: price,
+              carId: "3",
             ),
           ),
         );
