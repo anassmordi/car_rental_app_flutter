@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'booking_page.dart'; // Import the new BookingPage
 
 class DetailsPage extends StatelessWidget {
   final String imagePath;
@@ -16,7 +17,7 @@ class DetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF8F8F8), // Update background color
+      backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
@@ -25,7 +26,7 @@ class DetailsPage extends StatelessWidget {
         ),
         backgroundColor: Color(0xFFF8F8F8),
         elevation: 0,
-        title: Text('Details', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24)),
+        title: Text('Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -47,7 +48,7 @@ class DetailsPage extends StatelessWidget {
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      type,
+                      price, // Use price directly
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   ],
@@ -58,11 +59,11 @@ class DetailsPage extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'MAD',
+                          text: 'MAD ',
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                         TextSpan(
-                          text: price.replaceAll('MAD', ''),
+                          text: price.replaceAll('MAD', '').trim(),
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                         TextSpan(
@@ -105,9 +106,20 @@ class DetailsPage extends StatelessWidget {
             SizedBox(height: 16),
             Center(
               child: SizedBox(
-                width: 200, // Specify the width you want
+                width: 200,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingPage(
+                          imagePath: imagePath,
+                          title: title,
+                          price: price, // Pass the price directly
+                        ),
+                      ),
+                    );
+                  },
                   child: Center(
                     child: Text(
                       'Book Now',
@@ -118,13 +130,13 @@ class DetailsPage extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF4550AA), // button background color
-                    foregroundColor: Colors.white, // text color
-                    padding: EdgeInsets.symmetric(vertical: 20.0), // Adjust padding
+                    backgroundColor: Color(0xFF4550AA),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), // less rounded corners
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    minimumSize: Size(0, 50), // height of the button
+                    minimumSize: Size(0, 50),
                   ),
                 ),
               ),
@@ -178,7 +190,7 @@ class DetailsPage extends StatelessWidget {
 
   Widget buildFeatureChip(IconData iconData, String label) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10), // Increased margin
+      margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10),
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: Colors.white,

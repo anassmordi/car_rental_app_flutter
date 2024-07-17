@@ -1,8 +1,11 @@
 import 'package:bghit_nsog/pages/car_recommendations_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login_page.dart'; 
-import 'ride_history_page.dart'; // Import the Ride History page
+import 'login_page.dart';
+import 'ride_history_page.dart';
+import 'registration_page.dart';
+import 'package:bghit_nsog/pages/payment_methods_page.dart';
+import 'package:bghit_nsog/pages/privacy_policy_page.dart'; // Import the Privacy Policy page
 
 class ProfilePage extends StatelessWidget {
   Future<void> logout(BuildContext context) async {
@@ -17,6 +20,34 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  void showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFFF8F8F8),
+          title: Text('Logout', style: TextStyle(color: Colors.black)),
+          content: Text('Are you sure you want to logout?', style: TextStyle(color: Colors.black)),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: Colors.black)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Logout', style: TextStyle(color: Colors.black)),
+              onPressed: () {
+                logout(context);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +58,7 @@ class ProfilePage extends StatelessWidget {
           children: [
             AppBar(
               centerTitle: true,
-              title: Text('Profile', style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,fontSize: 24)),
+              title: Text('Profile', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop(),
@@ -38,7 +69,7 @@ class ProfilePage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 40),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -92,7 +123,7 @@ class ProfilePage extends StatelessWidget {
                         leading: Icon(Icons.logout, color: Colors.black),
                         title: Text('Logout', style: TextStyle(fontSize: 18)),
                         trailing: Icon(Icons.arrow_forward_ios, color: Colors.black),
-                        onTap: () => logout(context),
+                        onTap: () => showLogoutConfirmationDialog(context),
                       ),
                     ],
                   ),
@@ -130,10 +161,10 @@ class ProfilePage extends StatelessWidget {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/homePage');
           } else if (index == 1) {
-             Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
-              ); // Add this route if it exists
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
+            ); // Add this route if it exists
           } else if (index == 2) {
             Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
           } else if (index == 3) {
@@ -156,6 +187,21 @@ class ProfilePage extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => RideHistoryPage()),
+            );
+          } else if (title == 'Become a Renter') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RegistrationPage()),
+            );
+          } else if (title == 'Payment Methods') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PaymentMethodsPage()),
+            );
+          } else if (title == 'Privacy Policy') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PrivacyPolicyPage()),
             );
           } else {
             // Handle other options if needed

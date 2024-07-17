@@ -14,6 +14,11 @@ import 'pages/profile_page_agency.dart';
 import 'pages/details_page_agency.dart';
 import 'pages/results_page.dart';
 import 'pages/ride_history_page.dart'; 
+import 'pages/registration_page.dart';
+import 'package:bghit_nsog/pages/test_add_car_page.dart'; 
+import 'package:bghit_nsog/pages/become_agency_page.dart';
+import 'pages/agency_cars_page.dart'; 
+
 
 
 
@@ -68,6 +73,10 @@ class MyApp extends StatelessWidget {
         ),
         '/results': (context) => ResultsPage(),
         '/rideHistory': (context) => RideHistoryPage(),
+        '/registration': (context) => RegistrationPage(),
+        '/testAddCar': (context) => TestAddCarPage(),
+        '/becomeAgency': (context) => BecomeAgencyPage(),
+        '/agencyCars': (context) => AgencyCarsPage(),
       },
     );
   }

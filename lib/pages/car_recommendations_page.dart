@@ -13,7 +13,7 @@ class CarRecommendationsPage extends StatelessWidget {
         elevation: 0,
         title: Text(
           'Car Recommendations',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24),
         ),
         centerTitle: true,
       ),

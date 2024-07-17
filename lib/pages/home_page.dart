@@ -4,7 +4,8 @@ import 'login_page.dart';
 import 'filter_page.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'details_page.dart';
-import 'car_recommendations_page.dart'; // Import the new page
+import 'car_recommendations_page.dart';
+import 'notifications_page.dart'; // Import the Notifications page
 
 class HomePage extends StatefulWidget {
   @override
@@ -59,7 +60,15 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      Icon(Icons.notifications_none, color: Colors.black),
+                      IconButton(
+                        icon: Icon(Icons.notifications_none, color: Colors.black),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificationsPage()),
+                          );
+                        },
+                      ),
                     ],
                   ),
                   SizedBox(height: 16),

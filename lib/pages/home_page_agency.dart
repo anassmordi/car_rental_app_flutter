@@ -133,8 +133,8 @@ class _HomePageAgencyState extends State<HomePageAgency> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add car action
-        },
+    Navigator.pushNamed(context, '/testAddCar');
+  },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),
@@ -168,7 +168,7 @@ class _HomePageAgencyState extends State<HomePageAgency> {
               Navigator.pushReplacementNamed(context, '/homePageAgency');
               break;
             case 1:
-              // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
+              Navigator.pushNamed(context, '/agencyCars'); 
               break;
             case 2:
               // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists

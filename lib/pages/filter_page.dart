@@ -248,7 +248,7 @@ class _FilterSliderState extends State<FilterSlider> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
                     ),
                     child: Text(
                       'Clear all',
@@ -269,7 +269,7 @@ class _FilterSliderState extends State<FilterSlider> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
                     ),
                     child: Text(
                       'Apply',
