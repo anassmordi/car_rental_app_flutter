@@ -5,7 +5,8 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api_constants.dart'; // Import the constants
+import '../api_constants.dart'; 
+import 'car_recommendations_page.dart';
 
 class DetailsPage extends StatefulWidget {
   final String carId;
@@ -145,6 +146,15 @@ class _DetailsPageState extends State<DetailsPage> {
                           ),
                         ),
                       ),
+                      if (car['promotion']) // Check if there's a promotion
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Colors.red,
+                          child: Text(
+                            '${car['percentage']}% Off',
+                            style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                     ],
                   ),
                   SizedBox(height: 16),
@@ -226,8 +236,8 @@ class _DetailsPageState extends State<DetailsPage> {
             label: 'Cars',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Bookings',
+            icon: Icon(Icons.history),
+            label: 'Ride History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -244,10 +254,13 @@ class _DetailsPageState extends State<DetailsPage> {
               Navigator.pushReplacementNamed(context, '/homePage');
               break;
             case 1:
-              // Navigator.pushNamed(context, '/cars'); // Add this route if it exists
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
+              ); // Add this route if it exists
               break;
             case 2:
-              // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
+              Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
               break;
             case 3:
               Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
@@ -260,7 +273,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Widget buildFeatureChip(IconData iconData, String label) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10),
+      margin: EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -278,7 +291,7 @@ class _DetailsPageState extends State<DetailsPage> {
         children: [
           Icon(iconData, color: Colors.black),
           SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 12)),
+          Text(label, style: TextStyle(fontSize: 11)),
         ],
       ),
     );

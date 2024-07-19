@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'results_page_agency.dart';
 
 class FilterSliderAgency extends StatefulWidget {
   final ScrollController scrollController;
+  final List<dynamic> cars; // Add this line
+  final Function(List<dynamic>) onFilterApplied; // Add this line
 
-  FilterSliderAgency({required this.scrollController});
+  FilterSliderAgency({required this.scrollController, required this.cars, required this.onFilterApplied}); // Modify constructor
 
   @override
   _FilterSliderAgencyState createState() => _FilterSliderAgencyState();
@@ -11,19 +14,70 @@ class FilterSliderAgency extends StatefulWidget {
 
 class _FilterSliderAgencyState extends State<FilterSliderAgency> {
   String selectedBrand = '';
+  String selectedModel = '';
   String selectedType = '';
   String selectedTransmission = '';
   String selectedFuel = '';
   double priceRange = 250;
 
+  final Map<String, List<String>> carModels = {
+    'BMW': ['1 Series', '3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5'],
+    'Renault': ['Clio', 'Megane', 'Captur', 'Kadjar', 'Scenic'],
+    'Dacia': ['Duster', 'Logan', 'Sandero'],
+    'Mercedes': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE'],
+    'Volvo': ['XC40', 'XC60', 'XC90', 'S60', 'S90'],
+    'Toyota': ['Camry', 'Corolla', 'Highlander', 'RAV4', 'Yaris'],
+    'Honda': ['Accord', 'Civic', 'CR-V', 'Fit', 'HR-V'],
+    'Ford': ['Escape', 'Explorer', 'F-150', 'Focus', 'Mustang'],
+    'Chevrolet': ['Blazer', 'Camaro', 'Equinox', 'Malibu', 'Tahoe'],
+    'Nissan': ['Altima', 'Maxima', 'Rogue', 'Sentra', 'Versa'],
+    'Hyundai': ['Elantra', 'Kona', 'Palisade', 'Santa Fe', 'Sonata'],
+    'Kia': ['Forte', 'Optima', 'Sorento', 'Soul', 'Sportage'],
+    'Volkswagen': ['Atlas', 'Golf', 'Jetta', 'Passat', 'Tiguan'],
+    'Audi': ['A3', 'A4', 'A6', 'Q5', 'Q7'],
+    'Mazda': ['CX-3', 'CX-5', 'CX-9', 'Mazda3', 'Mazda6'],
+    'Citroen': ['C3', 'C4', 'C5', 'Berlingo', 'DS3']
+  };
+
   void clearAllSelections() {
     setState(() {
       selectedBrand = '';
+      selectedModel = '';
       selectedType = '';
       selectedTransmission = '';
       selectedFuel = '';
       priceRange = 250;
     });
+  }
+
+  void applyFilters() {
+    List<dynamic> filteredCars = widget.cars;
+
+    if (selectedBrand.isNotEmpty) {
+      filteredCars = filteredCars.where((car) => car['make'] == selectedBrand).toList();
+    }
+
+    if (selectedModel.isNotEmpty) {
+      filteredCars = filteredCars.where((car) => car['model'] == selectedModel).toList();
+    }
+
+    if (selectedType.isNotEmpty) {
+      filteredCars = filteredCars.where((car) => car['type'] == selectedType).toList();
+    }
+
+    if (selectedTransmission.isNotEmpty) {
+      filteredCars = filteredCars.where((car) => car['transmissionType'] == selectedTransmission).toList();
+    }
+
+    if (selectedFuel.isNotEmpty) {
+      filteredCars = filteredCars.where((car) => car['fuelType'] == selectedFuel).toList();
+    }
+
+    if (priceRange > 250) {
+      filteredCars = filteredCars.where((car) => car['price'] <= priceRange).toList();
+    }
+
+    widget.onFilterApplied(filteredCars);
   }
 
   @override
@@ -73,30 +127,35 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
                   buildCustomChip('BMW', 'assets/BMW.png', selectedBrand == 'BMW', () {
                     setState(() {
                       selectedBrand = 'BMW';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
-                  SizedBox(width: 12), // Space between chips
+                  SizedBox(width: 12),
                   buildCustomChip('Mercedes', 'assets/Mercedes.png', selectedBrand == 'Mercedes', () {
                     setState(() {
                       selectedBrand = 'Mercedes';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
-                  SizedBox(width: 12), // Space between chips
+                  SizedBox(width: 12),
                   buildCustomChip('Volvo', 'assets/Volvo.png', selectedBrand == 'Volvo', () {
                     setState(() {
                       selectedBrand = 'Volvo';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
-                  SizedBox(width: 12), // Space between chips
+                  SizedBox(width: 12),
                   buildCustomChip('Dacia', 'assets/Dacia.png', selectedBrand == 'Dacia', () {
                     setState(() {
                       selectedBrand = 'Dacia';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
-                  SizedBox(width: 12), // Space between chips
+                  SizedBox(width: 12),
                   buildCustomChip('Renault', 'assets/Renault.png', selectedBrand == 'Renault', () {
                     setState(() {
                       selectedBrand = 'Renault';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                 ],
@@ -107,13 +166,20 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
             DropdownButton<String>(
               isExpanded: true,
               hint: Text('Select car model'),
-              items: <String>['Model A', 'Model B', 'Model C'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (_) {},
+              value: selectedModel.isNotEmpty ? selectedModel : null,
+              items: selectedBrand.isNotEmpty
+                  ? carModels[selectedBrand]!.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()
+                  : [],
+              onChanged: (value) {
+                setState(() {
+                  selectedModel = value!;
+                });
+              },
             ),
             SizedBox(height: 30),
             Text('Types', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
@@ -166,9 +232,9 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
               spacing: 10,
               runSpacing: 10,
               children: [
-                buildCustomChip('Any', '', selectedTransmission == 'Any', () {
+                buildCustomChip('Any', '', selectedTransmission == '', () {
                   setState(() {
-                    selectedTransmission = 'Any';
+                    selectedTransmission = '';
                   });
                 }),
                 buildCustomChip('Manual', '', selectedTransmission == 'Manual', () {
@@ -253,7 +319,7 @@ class _FilterSliderAgencyState extends State<FilterSliderAgency> {
                 SizedBox(width: 35),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: applyFilters,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF4550AA),
                       shape: RoundedRectangleBorder(

@@ -1,11 +1,20 @@
+import 'package:bghit_nsog/pages/results_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:geolocator/geolocator.dart';
 import 'login_page.dart';
 import 'filter_page.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'details_page.dart';
 import 'car_recommendations_page.dart';
-import 'notifications_page.dart'; // Import the Notifications page
+import 'notifications_page.dart';
+import '../api_constants.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,6 +23,120 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final PanelController _panelController = PanelController();
+  List<dynamic> _carsByLocation = [];
+  List<dynamic> _carsByClick = [];
+  bool _isLoading = true;
+  String? _error;
+  String _currentCity = 'Loading...'; // Add a field to store the current city
+  final String openCageApiKey = "f653df93cf4e4621b5c293241892b493"; // Your OpenCage API key
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCars();
+    _getCurrentLocation(); // Fetch current location and city name
+  }
+
+  Future<void> _fetchCars() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse('$BASE_URL/api/cars');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _carsByLocation = data['carsByLocation'] ?? [];
+          _carsByClick = data['carsByClick'] ?? [];
+          _isLoading = false;
+        });
+      } else {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _error = data['message'];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'An error occurred. Please try again.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<Uint8List> _fetchImage(String imageName) async {
+    try {
+      final correctedImageName = imageName.replaceFirst(RegExp(r'^images\\cars\\'), '');
+      final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+      final file = File(filePath);
+      if (await file.exists()) {
+        return file.readAsBytes();
+      } else {
+        throw Exception('Image not found');
+      }
+    } catch (e) {
+      throw Exception('Failed to load image');
+    }
+  }
+
+  void toggleFilterPanel() {
+    if (_panelController.isPanelClosed) {
+      _panelController.open();
+    } else {
+      _panelController.close();
+    }
+  }
+
+  Future<void> _applyTypeFilter(String type) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse('$BASE_URL/api/cars/search');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+
+    final body = {'type': type};
+
+    try {
+      final response = await http.post(url, headers: headers, body: jsonEncode(body));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final carsWithPromotions = data['carsWithPromotions'] ?? [];
+        final otherCars = data['otherCars'] ?? [];
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultsPage(
+              carsWithPromotions: carsWithPromotions,
+              otherCars: otherCars,
+            ),
+          ),
+        );
+      } else {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'])),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    }
+  }
 
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -27,11 +150,43 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void toggleFilterPanel() {
-    if (_panelController.isPanelClosed) {
-      _panelController.open();
-    } else {
-      _panelController.close();
+  void _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      _getAddressFromLatLng(position.latitude, position.longitude);
+    } catch (e) {
+      print('Error getting current location: $e');
+    }
+  }
+
+  Future<void> _getAddressFromLatLng(double lat, double lng) async {
+    final url =
+        'https://api.opencagedata.com/geocode/v1/json?q=$lat+$lng&key=$openCageApiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        if (data['results'].isNotEmpty) {
+          setState(() {
+            _currentCity = data['results'][0]['components']['city'] ?? 'Unknown city';
+          });
+        } else {
+          setState(() {
+            _currentCity = "No city available.";
+          });
+        }
+      } else {
+        setState(() {
+          _currentCity = "Error fetching geocoding data.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentCity = "Error: $e";
+      });
     }
   }
 
@@ -55,7 +210,7 @@ class _HomePageState extends State<HomePage> {
                           Icon(Icons.location_on_outlined, color: Colors.black),
                           SizedBox(width: 8),
                           Text(
-                            'Casablanca',
+                            _currentCity, // Update to display current city
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -98,45 +253,15 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              ChoiceChip(
-                                label: Text('Sedan'),
-                                selected: false,
-                                backgroundColor: Color(0xFFF8F8F8),
-                                selectedColor: Color(0xFFF8F8F8),
-                                disabledColor: Color(0xFFF8F8F8),
-                              ),
+                              buildChoiceChip('Sedan'),
                               SizedBox(width: 17),
-                              ChoiceChip(
-                                label: Text('Hatchback'),
-                                selected: false,
-                                backgroundColor: Color(0xFFF8F8F8),
-                                selectedColor: Color(0xFFF8F8F8),
-                                disabledColor: Color(0xFFF8F8F8),
-                              ),
+                              buildChoiceChip('Hatchback'),
                               SizedBox(width: 17),
-                              ChoiceChip(
-                                label: Text('Suv'),
-                                selected: false,
-                                backgroundColor: Color(0xFFF8F8F8),
-                                selectedColor: Color(0xFFF8F8F8),
-                                disabledColor: Color(0xFFF8F8F8),
-                              ),
+                              buildChoiceChip('Suv'),
                               SizedBox(width: 17),
-                              ChoiceChip(
-                                label: Text('Van'),
-                                selected: false,
-                                backgroundColor: Color(0xFFF8F8F8),
-                                selectedColor: Color(0xFFF8F8F8),
-                                disabledColor: Color(0xFFF8F8F8),
-                              ),
+                              buildChoiceChip('Van'),
                               SizedBox(width: 17),
-                              ChoiceChip(
-                                label: Text('Economy'),
-                                selected: false,
-                                backgroundColor: Color(0xFFF8F8F8),
-                                selectedColor: Color(0xFFF8F8F8),
-                                disabledColor: Color(0xFFF8F8F8),
-                              ),
+                              buildChoiceChip('Economy'),
                             ],
                           ),
                         ),
@@ -149,31 +274,45 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300'),
-                        buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/clio_4.png', 'Renault Clio 4', 'Hatchback', 'MAD300'),
-                        buildCarCard('assets/citreon_c3.png', 'Citroen C3', 'Sedan', 'MAD350'),
-                        buildCarCard('assets/dacia_duster.png', 'Dacia Duster', 'Sedan', 'MAD350'),
-                      ],
-                    ),
-                  ),
+                  _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : _error != null
+                          ? Center(child: Text(_error!))
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: _carsByLocation.map((car) {
+                                  return buildCarCard(
+                                    car['imageFileNames'][0],
+                                    '${car['make']} ${car['model']}',
+                                    car['type'],
+                                    'MAD${car['price']}',
+                                    car['id'].toString(),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
                   SizedBox(height: 24),
                   Text(
                     'Car recommendations',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
-                  buildRecommendationCard('assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-                  buildRecommendationCard('assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'Suv', 'MAD500'),
-                  buildRecommendationCard('assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
+                  _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : _error != null
+                          ? Center(child: Text(_error!))
+                          : Column(
+                              children: _carsByClick.map((car) {
+                                return buildRecommendationCard(
+                                  car['imageFileNames'][0],
+                                  '${car['make']} ${car['model']}',
+                                  car['type'],
+                                  'MAD${car['price']}',
+                                  car['id'].toString(),
+                                );
+                              }).toList(),
+                            ),
                 ],
               ),
             ),
@@ -227,7 +366,7 @@ class _HomePageState extends State<HomePage> {
               );
               break;
             case 2:
-              Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
+              // Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
               break;
             case 3:
               Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
@@ -238,14 +377,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildCarCard(String imagePath, String title, String type, String price) {
+  Widget buildChoiceChip(String label) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: false,
+      backgroundColor: Color(0xFFF8F8F8),
+      selectedColor: Color(0xFFF8F8F8),
+      onSelected: (selected) {
+        _applyTypeFilter(label);
+      },
+    );
+  }
+
+  Widget buildCarCard(String imagePath, String title, String type, String price, String carId) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              carId: "4",
+              carId: carId,
             ),
           ),
         );
@@ -268,7 +419,18 @@ class _HomePageState extends State<HomePage> {
           ),
           child: Column(
             children: [
-              Image.asset(imagePath, height: 95, fit: BoxFit.contain),
+              FutureBuilder<Uint8List>(
+                future: _fetchImage(imagePath),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Icon(Icons.error);
+                  } else {
+                    return Image.memory(snapshot.data!, height: 95, fit: BoxFit.contain);
+                  }
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -295,18 +457,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildRecommendationCard(String imagePath, String title, String type, String price) {
+  Widget buildRecommendationCard(String imagePath, String title, String type, String price, String carId) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              // imagePath: imagePath,
-              // title: title,
-              // type: type,
-              // price: price,
-              carId: "4",
+              carId: carId,
             ),
           ),
         );
@@ -328,7 +486,18 @@ class _HomePageState extends State<HomePage> {
           ),
           child: ListTile(
             contentPadding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0),
-            leading: Image.asset(imagePath, width: 100, height: 60, fit: BoxFit.contain),
+            leading: FutureBuilder<Uint8List>(
+              future: _fetchImage(imagePath),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Icon(Icons.error);
+                } else {
+                  return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
+                }
+              },
+            ),
             title: Text(
               title,
               style: TextStyle(

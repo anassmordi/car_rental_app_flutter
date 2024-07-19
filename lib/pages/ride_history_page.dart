@@ -57,56 +57,56 @@ class RideHistoryPage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.directions_car),
-            label: 'Cars',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Bookings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: 2, // Set to Bookings
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
-              break;
-            case 1:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
-              );
-              break;
-            case 2:
-              // Already on RideHistoryPage
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ProfilePage()),
-              );
-              break;
-          }
-        },
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   type: BottomNavigationBarType.fixed,
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       label: 'Home',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.directions_car),
+      //       label: 'Cars',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.history),
+      //       label: 'Ride History',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.person),
+      //       label: 'Profile',
+      //     ),
+      //   ],
+      //   currentIndex: 2, // Set to Bookings
+      //   selectedItemColor: Colors.black,
+      //   unselectedItemColor: Colors.grey,
+      //   backgroundColor: Colors.white,
+      //   onTap: (index) {
+      //     switch (index) {
+      //       case 0:
+      //         Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(builder: (context) => HomePage()),
+      //         );
+      //         break;
+      //       case 1:
+      //         Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
+      //         );
+      //         break;
+      //       case 2:
+      //         // Already on RideHistoryPage
+      //         break;
+      //       case 3:
+      //         Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(builder: (context) => ProfilePage()),
+      //         );
+      //         break;
+      //     }
+      //   },
+      // ),
     );
   }
 

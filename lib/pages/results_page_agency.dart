@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'details_page.dart';
-import 'filter_page.dart';
+import 'details_page_agency.dart';
+import 'filter_page_agency.dart';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-class ResultsPage extends StatelessWidget {
+class ResultsPageAgency extends StatelessWidget {
   final PanelController _panelController = PanelController();
   final List<dynamic> carsWithPromotions;
   final List<dynamic> otherCars;
+  final List<dynamic> allCars; // Add this line
 
-  ResultsPage({required this.carsWithPromotions, required this.otherCars}) {
-    // Debug prints
-    print("Cars with promotions: $carsWithPromotions");
-    print("Other cars: $otherCars");
-  }
+  ResultsPageAgency({
+    required this.carsWithPromotions,
+    required this.otherCars,
+    required this.allCars, // Add this line
+  });
 
   void toggleFilterPanel(BuildContext context) {
     if (_panelController.isPanelClosed) {
@@ -123,8 +124,21 @@ class ResultsPage extends StatelessWidget {
           ),
           SlidingUpPanel(
             controller: _panelController,
-            panelBuilder: (scrollController) => FilterSlider(
+            panelBuilder: (scrollController) => FilterSliderAgency(
               scrollController: scrollController,
+              cars: allCars, // Pass the allCars list here
+              onFilterApplied: (filteredCars) { // Handle the filtered results
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ResultsPageAgency(
+                      carsWithPromotions: filteredCars.where((car) => car['promotion']).toList(),
+                      otherCars: filteredCars.where((car) => !car['promotion']).toList(),
+                      allCars: allCars, // Pass the original list
+                    ),
+                  ),
+                );
+              },
             ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             minHeight: 0, // Ensure the panel starts hidden
@@ -151,7 +165,7 @@ class ResultsPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailsPage(carId: carId),
+            builder: (context) => DetailsPageAgency(carId: carId),
           ),
         );
       },
@@ -231,7 +245,7 @@ class ResultsPage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailsPage(carId: carId),
+            builder: (context) => DetailsPageAgency(carId: carId),
           ),
         );
       },

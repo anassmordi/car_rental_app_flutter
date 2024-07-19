@@ -7,11 +7,33 @@ import 'registration_page.dart';
 import 'package:bghit_nsog/pages/payment_methods_page.dart';
 import 'package:bghit_nsog/pages/privacy_policy_page.dart'; // Import the Privacy Policy page
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName');
+    });
+  }
+
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
     await prefs.remove('refreshToken');
+    await prefs.remove('userName');
+    await prefs.remove('userRole');
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -98,7 +120,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Anass Mordi',
+                        userName ?? 'Loading...', // Display the user's name or a loading indicator
                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 6),
@@ -117,7 +139,7 @@ class ProfilePage extends StatelessWidget {
                       Divider(),
                       buildProfileOption(Icons.privacy_tip, 'Privacy Policy', context),
                       Divider(),
-                      buildProfileOption(Icons.car_rental, 'Become a Renter', context),
+                      buildProfileOption(Icons.car_rental, 'Become an Agency', context),
                       Divider(),
                       ListTile(
                         leading: Icon(Icons.logout, color: Colors.black),
@@ -166,10 +188,8 @@ class ProfilePage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
             ); // Add this route if it exists
           } else if (index == 2) {
-            Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
-          } else if (index == 3) {
-            // Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
-          }
+            
+          } 
         },
       ),
     );
@@ -188,7 +208,7 @@ class ProfilePage extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => RideHistoryPage()),
             );
-          } else if (title == 'Become a Renter') {
+          } else if (title == 'Become an Agency') {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => RegistrationPage()),

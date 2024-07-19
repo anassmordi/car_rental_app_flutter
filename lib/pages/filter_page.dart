@@ -22,6 +22,25 @@ class _FilterSliderState extends State<FilterSlider> {
   String selectedFuel = '';
   double priceRange = 250;
 
+  final Map<String, List<String>> carModels = {
+    'BMW': ['1 Series', '3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5'],
+    'Renault': ['Clio', 'Megane', 'Captur', 'Kadjar', 'Scenic'],
+    'Dacia': ['Duster', 'Logan', 'Sandero'],
+    'Mercedes': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE'],
+    'Volvo': ['XC40', 'XC60', 'XC90', 'S60', 'S90'],
+    'Toyota': ['Camry', 'Corolla', 'Highlander', 'RAV4', 'Yaris'],
+    'Honda': ['Accord', 'Civic', 'CR-V', 'Fit', 'HR-V'],
+    'Ford': ['Escape', 'Explorer', 'F-150', 'Focus', 'Mustang'],
+    'Chevrolet': ['Blazer', 'Camaro', 'Equinox', 'Malibu', 'Tahoe'],
+    'Nissan': ['Altima', 'Maxima', 'Rogue', 'Sentra', 'Versa'],
+    'Hyundai': ['Elantra', 'Kona', 'Palisade', 'Santa Fe', 'Sonata'],
+    'Kia': ['Forte', 'Optima', 'Sorento', 'Soul', 'Sportage'],
+    'Volkswagen': ['Atlas', 'Golf', 'Jetta', 'Passat', 'Tiguan'],
+    'Audi': ['A3', 'A4', 'A6', 'Q5', 'Q7'],
+    'Mazda': ['CX-3', 'CX-5', 'CX-9', 'Mazda3', 'Mazda6'],
+    'Citroen': ['C3', 'C4', 'C5', 'Berlingo', 'DS3']
+  };
+
   void clearAllSelections() {
     setState(() {
       selectedBrand = '';
@@ -34,63 +53,62 @@ class _FilterSliderState extends State<FilterSlider> {
   }
 
   Future<void> applyFilters() async {
-  final prefs = await SharedPreferences.getInstance();
-  final accessToken = prefs.getString('accessToken');
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
 
-  final url = Uri.parse('$BASE_URL/api/cars/search');
-  final headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer $accessToken',
-  };
+    final url = Uri.parse('$BASE_URL/api/cars/search');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
 
-  final body = <String, dynamic>{};
-  if (selectedBrand.isNotEmpty) body['make'] = selectedBrand;
-  if (selectedModel.isNotEmpty) body['model'] = selectedModel;
-  if (selectedType.isNotEmpty) body['type'] = selectedType;
-  if (selectedTransmission.isNotEmpty) body['transmissionType'] = selectedTransmission;
-  if (selectedFuel.isNotEmpty) body['fuelType'] = selectedFuel;
-  if (priceRange > 250) body['minPrice'] = priceRange;
+    final body = <String, dynamic>{};
+    if (selectedBrand.isNotEmpty) body['make'] = selectedBrand;
+    if (selectedModel.isNotEmpty) body['model'] = selectedModel;
+    if (selectedType.isNotEmpty) body['type'] = selectedType;
+    if (selectedTransmission.isNotEmpty) body['transmissionType'] = selectedTransmission;
+    if (selectedFuel.isNotEmpty) body['fuelType'] = selectedFuel;
+    if (priceRange > 250) body['minPrice'] = priceRange;
 
-  // Log the request body
-  print('Request body: $body');
+    // Log the request body
+    print('Request body: $body');
 
-  try {
-    final response = await http.post(url, headers: headers, body: jsonEncode(body));
+    try {
+      final response = await http.post(url, headers: headers, body: jsonEncode(body));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final searchResult = data['searchResult'] ?? [];
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        // Extract cars with promotions and other cars based on provided response structure
+        final carsWithPromotions = data['carsWithPromotions'] ?? [];
+        final otherCars = data['otherCars'] ?? [];
 
-      // Split search results into cars with promotions and other cars
-      final carsWithPromotions = searchResult.where((car) => car['promotion'] == true).toList();
-      final otherCars = searchResult.where((car) => car['promotion'] == false).toList();
+        // Log the full API response
+        print('Full API response: $data');
+        print('Fetched cars with promotions: $carsWithPromotions');
+        print('Fetched other cars: $otherCars');
 
-      // Log the full API response
-      print('Full API response: $data');
-      print('Fetched cars with promotions: $carsWithPromotions');
-      print('Fetched other cars: $otherCars');
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultsPage(
-            carsWithPromotions: carsWithPromotions,
-            otherCars: otherCars,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultsPage(
+              carsWithPromotions: carsWithPromotions,
+              otherCars: otherCars,
+            ),
           ),
-        ),
-      );
-    } else {
-      final data = jsonDecode(response.body);
+        );
+      } else {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'])),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data['message'])),
+        SnackBar(content: Text('An error occurred. Please try again.')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('An error occurred. Please try again.')),
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -139,30 +157,35 @@ class _FilterSliderState extends State<FilterSlider> {
                   buildCustomChip('BMW', 'assets/BMW.png', selectedBrand == 'BMW', () {
                     setState(() {
                       selectedBrand = 'BMW';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                   SizedBox(width: 12), // Space between chips
                   buildCustomChip('Mercedes', 'assets/Mercedes.png', selectedBrand == 'Mercedes', () {
                     setState(() {
                       selectedBrand = 'Mercedes';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                   SizedBox(width: 12), // Space between chips
                   buildCustomChip('Volvo', 'assets/Volvo.png', selectedBrand == 'Volvo', () {
                     setState(() {
                       selectedBrand = 'Volvo';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                   SizedBox(width: 12), // Space between chips
                   buildCustomChip('Dacia', 'assets/Dacia.png', selectedBrand == 'Dacia', () {
                     setState(() {
                       selectedBrand = 'Dacia';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                   SizedBox(width: 12), // Space between chips
                   buildCustomChip('Renault', 'assets/Renault.png', selectedBrand == 'Renault', () {
                     setState(() {
                       selectedBrand = 'Renault';
+                      selectedModel = ''; // Reset the model when the brand changes
                     });
                   }),
                 ],
@@ -174,12 +197,14 @@ class _FilterSliderState extends State<FilterSlider> {
               isExpanded: true,
               hint: Text('Select car model'),
               value: selectedModel.isNotEmpty ? selectedModel : null,
-              items: <String>['Model A', 'Model B', 'Model C'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+              items: selectedBrand.isNotEmpty
+                  ? carModels[selectedBrand]!.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()
+                  : [],
               onChanged: (value) {
                 setState(() {
                   selectedModel = value!;
@@ -237,9 +262,9 @@ class _FilterSliderState extends State<FilterSlider> {
               spacing: 10,
               runSpacing: 10,
               children: [
-                buildCustomChip('Any', '', selectedTransmission == 'Any', () {
+                buildCustomChip('Any', '', selectedTransmission == '', () {
                   setState(() {
-                    selectedTransmission = 'Any';
+                    selectedTransmission = '';
                   });
                 }),
                 buildCustomChip('Manual', '', selectedTransmission == 'Manual', () {

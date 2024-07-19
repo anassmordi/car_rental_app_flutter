@@ -11,13 +11,14 @@ import 'pages/details_page.dart';
 import 'pages/home_page_agency.dart';
 import 'pages/profile_page_agency.dart';
 import 'pages/details_page_agency.dart';
-import 'pages/results_page.dart';
+// import 'pages/results_page.dart';
 import 'pages/ride_history_page.dart';
 import 'pages/registration_page.dart';
-import 'pages/test_add_car_page.dart';
+import 'pages/car_form_page.dart';
 import 'pages/become_agency_page.dart';
 import 'pages/agency_cars_page.dart';
 import 'pages/profile_page.dart';
+import 'pages/results_page_agency.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,16 +60,18 @@ class MyApp extends StatelessWidget {
         '/homePageAgency': (context) => HomePageAgency(),
         '/profileAgency': (context) => ProfilePageAgency(),
         '/detailsAgency': (context) => DetailsPageAgency(
-          imagePath: '',
-          title: '',
-          type: '',
-          price: '',
+          carId: '',
         ),
         '/rideHistory': (context) => RideHistoryPage(),
         '/registration': (context) => RegistrationPage(),
-        '/testAddCar': (context) => TestAddCarPage(),
+        '/carForm': (context) => CarFormPage(),
         '/becomeAgency': (context) => BecomeAgencyPage(),
         '/agencyCars': (context) => AgencyCarsPage(),
+         '/resultsAgency': (context) => ResultsPageAgency(
+          carsWithPromotions: [],
+          otherCars: [],
+           allCars:[]
+        ),  
       },
     );
   }

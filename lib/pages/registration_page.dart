@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
+import 'login_page.dart'; // Ensure to import LoginPage
+import '../api_constants.dart'; // Ensure this file contains the BASE_URL and GET_CAR_URL
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -7,51 +13,75 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('Registration', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
-        backgroundColor: Color(0xFFF8F8F8),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 20), // Add this to lower the input fields
-              buildTextField('Your Name', 'Email your name'),
-              buildTextField('Company Name', 'Email your Company Name'),
-              buildTextField('Job Title', 'Owner / Founder'),
-              buildTextField('Fleet Size', '5-10 cars'),
-              buildPhoneNumberField(),
-              buildTextField('City', 'Select City'),
-              buildTextField('Address', 'Email your address'),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle form submission
-                  showSuccessDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF4550AA), // Button background color
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text('Send', style: TextStyle(fontSize: 18, color: Colors.white)),
-              ),
-            ],
-          ),
-        ),
-      ),
+  final _formKey = GlobalKey<FormState>();
+  String userName = '';
+  String companyName = '';
+  String jobTitle = '';
+  String fleetSize = '';
+  String contactNumber = '';
+  String city = '';
+  String address = '';
+  bool _isLoading = false; // State to handle loading
+
+  Future<void> becomeAgency(BuildContext context) async {
+    setState(() {
+      _isLoading = true; // Show loading screen
+    });
+
+    try {
+      // Get current location
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? accessToken = prefs.getString('accessToken');
+      if (accessToken == null) {
+        throw Exception('Access token not found');
+      }
+
+      final response = await http.patch(
+        Uri.parse('$BASE_URL/api/auth/becomeAgency'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'companyName': companyName,
+          'jobTitle': jobTitle,
+          'fleetSize': fleetSize,
+          'contactNumber': contactNumber,
+          'city': city,
+          'address': address,
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        showSuccessDialog(context);
+      } else {
+        final error = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('An error occurred: ${e.toString()}')));
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading screen
+      });
+    }
+  }
+
+  Future<void> logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    await prefs.remove('refreshToken');
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -74,11 +104,75 @@ class _RegistrationPageState extends State<RegistrationPage> {
       },
     );
 
-    // Automatically close the dialog after 3 seconds and navigate to home page
+    // Automatically close the dialog after 3 seconds and navigate to the login page
     Future.delayed(Duration(seconds: 3), () {
       Navigator.of(context).pop(); // Close the dialog
-      Navigator.pushNamedAndRemoveUntil(context, '/homePage', (Route<dynamic> route) => false); // Navigate to home and remove all previous routes
+      logout(context); // Log out the user
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text('Registration', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
+        backgroundColor: Color(0xFFF8F8F8),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    SizedBox(height: 20), // Add this to lower the input fields
+                    buildTextField('Your Name', 'Enter your name', (value) => userName = value),
+                    buildTextField('Company Name', 'Enter your Company Name', (value) => companyName = value),
+                    buildTextField('Job Title', 'Owner / Founder', (value) => jobTitle = value),
+                    buildTextField('Fleet Size', '5-10 cars', (value) => fleetSize = value),
+                    buildPhoneNumberField(),
+                    buildTextField('City', 'Select City', (value) => city = value),
+                    buildTextField('Address', 'Enter your address', (value) => address = value),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          _formKey.currentState?.save();
+                          becomeAgency(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4550AA), // Button background color
+                        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text('Send', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget buildPhoneNumberField() {
@@ -105,13 +199,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
         initialCountryCode: 'MA',
         onChanged: (phone) {
-          // Handle phone number change
+          contactNumber = phone.completeNumber; // Save the complete phone number
         },
       ),
     );
   }
 
-  Widget buildTextField(String label, String hint) {
+  Widget buildTextField(String label, String hint, Function(String) onSaved) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextFormField(
@@ -134,6 +228,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
           fillColor: Colors.white,
           contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $label';
+          }
+          return null;
+        },
+        onSaved: (value) => onSaved(value!),
       ),
     );
   }

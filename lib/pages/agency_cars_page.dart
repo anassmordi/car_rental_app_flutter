@@ -7,7 +7,9 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:bghit_nsog/api_constants.dart';
-import 'car_details_page.dart';
+import 'details_page_agency.dart';
+import 'home_page_agency.dart';
+import 'profile_page_agency.dart';
 
 class AgencyCarsPage extends StatefulWidget {
   @override
@@ -77,54 +79,134 @@ class _AgencyCarsPageState extends State<AgencyCarsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Your Cars')),
+      backgroundColor: Color(0xFFF8F8F8),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Your Cars',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24),
+        ),
+        centerTitle: true,
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
-              : ListView.builder(
-                  itemCount: _cars.length,
-                  itemBuilder: (context, index) {
-                    final car = _cars[index];
-                    return Card(
-                      child: ListTile(
-                        leading: FutureBuilder<Uint8List>(
-                          future: _fetchImage(car['imageFileNames'][0]),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Icon(Icons.error);
-                            } else {
-                              return SizedBox(
-                                width: 100,
-                                height: 60,
-                                child: Image.memory(snapshot.data!, fit: BoxFit.cover),
-                              );
-                            }
-                          },
-                        ),
-                        title: Text('${car['make']} ${car['model']}'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Type: ${car['type']}, Price: ${car['price']}'),
-                            Text('Image Name: ${car['imageFileNames'][0]}'), // Debug print in UI
-                          ],
-                        ),
-                        trailing: car['promotion']
-                            ? Text('${car['percentage']}% Off', style: TextStyle(color: Colors.red))
-                            : null,
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView.builder(
+                    itemCount: _cars.length,
+                    itemBuilder: (context, index) {
+                      final car = _cars[index];
+                      return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CarDetailsPage(carId: car['id'].toString())),
+                            MaterialPageRoute(
+                              builder: (context) => DetailsPageAgency(carId: car['id'].toString()),
+                            ),
                           );
                         },
-                      ),
-                    );
-                  },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(vertical: 17.0, horizontal: 16.0),
+                            leading: FutureBuilder<Uint8List>(
+                              future: _fetchImage(car['imageFileNames'][0]),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Icon(Icons.error);
+                                } else {
+                                  return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
+                                }
+                              },
+                            ),
+                            title: Text(
+                              '${car['make']} ${car['model']}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(car['type'], style: TextStyle(fontSize: 16)),
+                                SizedBox(height: 3),
+                                Text('MAD${car['price']}/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            trailing: car['promotion']
+                                ? Text('${car['percentage']}% Off', style: TextStyle(color: Colors.red))
+                                : null,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.directions_car),
+            label: 'Cars',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Bookings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: 1, // Set to Cars
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePageAgency()),
+              );
+              break;
+            case 1:
+              // Already on AgencyCarsPage
+              break;
+            case 2:
+              // Add navigation to bookings page when available
+              break;
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePageAgency()),
+              );
+              break;
+          }
+        },
+      ),
     );
   }
 }

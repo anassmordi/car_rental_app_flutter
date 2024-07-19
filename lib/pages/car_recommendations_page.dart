@@ -1,9 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'details_page.dart';
-import 'home_page.dart'; // Import HomePage to navigate back to it
-import 'profile_page.dart'; // Import ProfilePage to navigate to profile
+import 'home_page.dart';
+import 'profile_page.dart';
+import 'package:bghit_nsog/api_constants.dart';
 
-class CarRecommendationsPage extends StatelessWidget {
+class CarRecommendationsPage extends StatefulWidget {
+  @override
+  _CarRecommendationsPageState createState() => _CarRecommendationsPageState();
+}
+
+class _CarRecommendationsPageState extends State<CarRecommendationsPage> {
+  List<dynamic> _carRecommendations = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCarRecommendations();
+  }
+
+  Future<void> _fetchCarRecommendations() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    final url = Uri.parse('$BASE_URL/api/cars');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _carRecommendations = data['carsByClick'] ?? [];
+          _isLoading = false;
+        });
+      } else {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _error = data['message'];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'An error occurred. Please try again.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<Uint8List> _fetchImage(String imageName) async {
+    try {
+      final correctedImageName = imageName.replaceFirst(RegExp(r'^images\\cars\\'), '');
+      final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+      final file = File(filePath);
+      if (await file.exists()) {
+        return file.readAsBytes();
+      } else {
+        throw Exception('Image not found');
+      }
+    } catch (e) {
+      throw Exception('Failed to load image');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,18 +91,32 @@ class CarRecommendationsPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildRecommendationCard(context, 'assets/citreon_c3.png', 'Citroen C3', 'Hatchback', 'MAD350'),
-              SizedBox(height: 16),
-              buildRecommendationCard(context, 'assets/audi_a3_sportback.png', 'Audi A3 Sportback', 'SUV', 'MAD500'),
-              SizedBox(height: 16),
-              buildRecommendationCard(context, 'assets/mazda_3.png', 'Mazda Mazda 3', 'Sedan', 'MAD500'),
-            ],
-          ),
-        ),
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _error != null
+                ? Center(child: Text(_error!))
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _carRecommendations.map((car) {
+                        return Column(
+                          children: [
+                            buildRecommendationCard(
+                              context,
+                              car['imageFileNames'][0],
+                              '${car['make']} ${car['model']}',
+                              car['type'],
+                              'MAD${car['price']}',
+                              car['id'].toString(),
+                              car['promotion'], // Pass the promotion status
+                              car['percentage'], // Pass the promotion percentage
+                            ),
+                            SizedBox(height: 16),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -68,7 +154,7 @@ class CarRecommendationsPage extends StatelessWidget {
               // Already on CarRecommendationsPage
               break;
             case 2:
-              Navigator.pushNamed(context, '/rideHistory');
+              // Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
               break;
             case 3:
               Navigator.pushReplacement(
@@ -82,18 +168,14 @@ class CarRecommendationsPage extends StatelessWidget {
     );
   }
 
-  Widget buildRecommendationCard(BuildContext context, String imagePath, String title, String type, String price) {
+  Widget buildRecommendationCard(BuildContext context, String imagePath, String title, String type, String price, String carId, bool promotion, double percentage) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailsPage(
-              // imagePath: imagePath,
-              // title: title,
-              // type: type,
-              // price: price,
-              carId: "3",
+              carId: carId,
             ),
           ),
         );
@@ -113,7 +195,18 @@ class CarRecommendationsPage extends StatelessWidget {
         ),
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 16.0),
-          leading: Image.asset(imagePath, width: 100, height: 60, fit: BoxFit.contain),
+          leading: FutureBuilder<Uint8List>(
+            future: _fetchImage(imagePath),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Icon(Icons.error);
+              } else {
+                return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
+              }
+            },
+          ),
           title: Text(
             title,
             style: TextStyle(
@@ -126,7 +219,21 @@ class CarRecommendationsPage extends StatelessWidget {
             children: [
               Text(type, style: TextStyle(fontSize: 16)),
               SizedBox(height: 3),
-              Text('$price/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Text('$price/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  if (promotion)
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      color: Colors.red,
+                      child: Text(
+                        '$percentage% Off',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
