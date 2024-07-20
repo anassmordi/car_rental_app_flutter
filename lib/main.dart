@@ -19,6 +19,8 @@ import 'pages/become_agency_page.dart';
 import 'pages/agency_cars_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/results_page_agency.dart';
+import 'pages/booking_page.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +73,8 @@ class MyApp extends StatelessWidget {
           carsWithPromotions: [],
           otherCars: [],
            allCars:[]
-        ),  
+        ), 
+        '/booking': (context) => BookingPage(carId: '',imagePath: '',title: '',price: '',),
       },
     );
   }

@@ -5,8 +5,9 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../api_constants.dart'; 
+import '../api_constants.dart';
 import 'car_recommendations_page.dart';
+import 'booking_page.dart'; // Import the BookingPage
 
 class DetailsPage extends StatefulWidget {
   final String carId;
@@ -49,19 +50,10 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
-  Future<Uint8List> _fetchImage(String imageName) async {
-    try {
-      final correctedImageName = imageName.replaceFirst(RegExp(r'^images\\cars\\'), '');
-      final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
-      final file = File(filePath);
-      if (await file.exists()) {
-        return file.readAsBytes();
-      } else {
-        throw Exception('Image not found');
-      }
-    } catch (e) {
-      throw Exception('Failed to load image');
-    }
+  Future<String> _fetchImagePath(String imageName) async {
+    final correctedImageName = imageName.replaceFirst(RegExp(r'^images\\cars\\'), '');
+    final filePath = p.join('C:\\Users\\anass\\Documents\\', correctedImageName);
+    return filePath;
   }
 
   @override
@@ -95,15 +87,15 @@ class _DetailsPageState extends State<DetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: FutureBuilder<Uint8List>(
-                      future: _fetchImage(car['imageFileNames'][0]),
+                    child: FutureBuilder<String>(
+                      future: _fetchImagePath(car['imageFileNames'][0]),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Icon(Icons.error);
                         } else {
-                          return Image.memory(snapshot.data!, height: 200, fit: BoxFit.contain);
+                          return Image.file(File(snapshot.data!), height: 200, fit: BoxFit.contain);
                         }
                       },
                     ),
@@ -120,7 +112,7 @@ class _DetailsPageState extends State<DetailsPage> {
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            car['price'].toString(), // Use price directly
+                            car['price'].toString(),
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         ],
@@ -146,7 +138,7 @@ class _DetailsPageState extends State<DetailsPage> {
                           ),
                         ),
                       ),
-                      if (car['promotion']) // Check if there's a promotion
+                      if (car['promotion'])
                         Container(
                           padding: EdgeInsets.all(8.0),
                           color: Colors.red,
@@ -185,17 +177,19 @@ class _DetailsPageState extends State<DetailsPage> {
                     child: SizedBox(
                       width: 200,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   // MaterialPageRoute(
-                          //   //   // builder: (context) => BookingPage(
-                          //   //   //   carId: car['id'],
-                          //   //   //   title: '${car['make']} ${car['model']}',
-                          //   //   //   price: car['price'].toString(),
-                          //   //   // ),
-                          //   // ),
-                          // );
+                        onPressed: () async {
+                          String imagePath = await _fetchImagePath(car['imageFileNames'][0]);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookingPage(
+                                carId: widget.carId, // Pass the carId
+                                imagePath: imagePath, // Pass the image path
+                                title: '${car['make']} ${car['model']}', // Pass the car title
+                                price: car['price'].toString(), // Pass the car price
+                              ),
+                            ),
+                          );
                         },
                         child: Center(
                           child: Text(
@@ -257,13 +251,13 @@ class _DetailsPageState extends State<DetailsPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CarRecommendationsPage()),
-              ); // Add this route if it exists
+              );
               break;
             case 2:
-              Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
+              Navigator.pushNamed(context, '/rideHistory');
               break;
             case 3:
-              Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
+              Navigator.pushNamed(context, '/profile');
               break;
           }
         },

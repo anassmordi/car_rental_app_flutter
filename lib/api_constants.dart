@@ -5,3 +5,5 @@ const String REGISTER_URL = 'api/auth/register';
 const String ADD_CAR_URL = 'api/cars';
 const String GET_CAR_URL = 'api/cars';
 const String BECOME_AGENCY_URL = 'api/auth/becomeAgency'; 
+const String CREATE_BOOKING_URL = 'api/bookings'; 
+const String GET_BOOKING_URL = 'api/bookings'; 

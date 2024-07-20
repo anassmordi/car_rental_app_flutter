@@ -1,6 +1,64 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'notification_model.dart' as custom; // Import the notification model with an alias
+import '../api_constants.dart';
 
-class NotificationsPage extends StatelessWidget {
+class NotificationsPage extends StatefulWidget {
+  @override
+  _NotificationsPageState createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  List<custom.Notification> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+    _resetUnreadNotificationsCount(); // Reset unread notifications count when page is visited
+  }
+
+  Future<void> _fetchNotifications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null) {
+      // Handle the case when there is no access token
+      setState(() {
+        _isLoading = false;
+      });
+      throw Exception('No access token found');
+    }
+
+    final url = Uri.parse('$BASE_URL/api/notification');
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    });
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _notifications = data.map((json) => custom.Notification.fromJson(json)).toList();
+        _isLoading = false;
+      });
+    } else {
+      // Handle error
+      setState(() {
+        _isLoading = false;
+      });
+      throw Exception('Failed to load notifications');
+    }
+  }
+
+  Future<void> _resetUnreadNotificationsCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('unreadNotifications', 0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,38 +81,41 @@ class NotificationsPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'General',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 4, // Number of notifications
-                itemBuilder: (context, index) {
-                  return Card(
-                    color: Colors.white,
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        child: Icon(Icons.person, color: Colors.white),
-                      ),
-                      title: Text('Anass Mordi •'),
-                      subtitle: Text('24 Feb 2025 at 10:30 AM'),
-                      onTap: () {
-                        // Handle notification tap
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'General',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _notifications.length,
+                      itemBuilder: (context, index) {
+                        final notification = _notifications[index];
+                        return Card(
+                          color: Colors.white,
+                          margin: EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              child: Icon(Icons.person, color: Colors.white),
+                            ),
+                            title: Text(notification.message),
+                            subtitle: Text(notification.timestamp),
+                            onTap: () {
+                              // Handle notification tap
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

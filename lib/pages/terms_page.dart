@@ -1,6 +1,38 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../api_constants.dart';
 
 class TermsPage extends StatefulWidget {
+  final String carId;
+  final String imagePath;
+  final String title;
+  final String price;
+  final String pickupDate;
+  final String returnDate;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String cin;
+  final String phoneNumber;
+  final String address;
+
+  TermsPage({
+    required this.carId,
+    required this.imagePath,
+    required this.title,
+    required this.price,
+    required this.pickupDate,
+    required this.returnDate,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.cin,
+    required this.phoneNumber,
+    required this.address,
+  });
+
   @override
   _TermsPageState createState() => _TermsPageState();
 }
@@ -40,7 +72,7 @@ class _TermsPageState extends State<TermsPage> {
             children: [
               Icon(Icons.check_circle, size: 100, color: Colors.green),
               SizedBox(height: 20),
-              Text('Information submitted successfully', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+              Text('Booking completed successfully', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
               SizedBox(height: 10),
             ],
           ),
@@ -60,14 +92,59 @@ class _TermsPageState extends State<TermsPage> {
       _isLoading = true;
     });
 
-    // Simulate a network call
-    await Future.delayed(Duration(seconds: 2));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? accessToken = prefs.getString('accessToken');
+
+    final bookingData = {
+      "carId": widget.carId,
+      "startDate": widget.pickupDate,
+      "endDate": widget.returnDate,
+      "personalInfo": {
+        "cin": widget.cin,
+        "firstName": widget.firstName,
+        "lastName": widget.lastName,
+        "email": widget.email,
+        "tel": widget.phoneNumber,
+        "address": widget.address,
+      }
+    };
+
+    final response = await http.post(
+      Uri.parse('$BASE_URL/$CREATE_BOOKING_URL'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode(bookingData),
+    );
 
     setState(() {
       _isLoading = false;
     });
 
-    _showSuccessDialog(context);
+    if (response.statusCode == 201) {
+      _showSuccessDialog(context);
+    } else {
+      // Handle error
+      final responseData = json.decode(response.body);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text(responseData['message']),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override

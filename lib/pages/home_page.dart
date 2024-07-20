@@ -1,3 +1,4 @@
+import 'package:bghit_nsog/pages/pending_bookings.dart';
 import 'package:bghit_nsog/pages/results_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -303,15 +304,37 @@ class _HomePageState extends State<HomePage> {
                       : _error != null
                           ? Center(child: Text(_error!))
                           : Column(
-                              children: _carsByClick.map((car) {
-                                return buildRecommendationCard(
-                                  car['imageFileNames'][0],
-                                  '${car['make']} ${car['model']}',
-                                  car['type'],
-                                  'MAD${car['price']}',
-                                  car['id'].toString(),
-                                );
-                              }).toList(),
+                              children: [
+                                ..._carsByClick.take(5).map((car) {
+                                  return buildRecommendationCard(
+                                    car['imageFileNames'][0],
+                                    '${car['make']} ${car['model']}',
+                                    car['type'],
+                                    'MAD${car['price']}',
+                                    car['id'].toString(),
+                                  );
+                                }).toList(),
+                                if (_carsByClick.length > 5)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
+                                    child: Center(
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => CarRecommendationsPage(),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          'See more',
+                                          style: TextStyle(fontSize: 16, color: Colors.blue),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                 ],
               ),
@@ -366,7 +389,10 @@ class _HomePageState extends State<HomePage> {
               );
               break;
             case 2:
-              // Navigator.pushNamed(context, '/rideHistory'); // Add this route if it exists
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PendingBookingsPage()),  // Navigate to PendingBookingsPage
+            );
               break;
             case 3:
               Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage

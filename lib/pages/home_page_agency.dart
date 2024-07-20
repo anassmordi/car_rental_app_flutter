@@ -1,3 +1,4 @@
+import 'package:bghit_nsog/pages/pending_bookings.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,11 @@ import 'filter_page_agency.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'details_page_agency.dart';
 import 'results_page_agency.dart';
+import 'notifications_page.dart';
+
+
+
+
 
 class HomePageAgency extends StatefulWidget {
   @override
@@ -188,7 +194,10 @@ class _HomePageAgencyState extends State<HomePageAgency> {
                       IconButton(
                         icon: Icon(Icons.notifications_none, color: Colors.black),
                         onPressed: () {
-                          // Navigate to NotificationsPage
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificationsPage()),
+                          );
                         },
                       ),
                     ],
@@ -290,71 +299,90 @@ class _HomePageAgencyState extends State<HomePageAgency> {
                       ? Center(child: CircularProgressIndicator())
                       : _error != null
                           ? Center(child: Text(_error!))
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: _cars.length,
-                              itemBuilder: (context, index) {
-                                final car = _cars[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => DetailsPageAgency(carId: car['id'].toString()),
+                          : Column(
+                              children: [
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: _cars.length > 5 ? 5 : _cars.length,
+                                  itemBuilder: (context, index) {
+                                    final car = _cars[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailsPageAgency(carId: car['id'].toString()),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 16),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.3),
+                                              spreadRadius: 1,
+                                              blurRadius: 5,
+                                              offset: Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ListTile(
+                                          contentPadding: EdgeInsets.symmetric(vertical: 17.0, horizontal: 16.0),
+                                          leading: FutureBuilder<Uint8List>(
+                                            future: _fetchImage(car['imageFileNames'][0]),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                return CircularProgressIndicator();
+                                              } else if (snapshot.hasError) {
+                                                return Icon(Icons.error);
+                                              } else {
+                                                return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
+                                              }
+                                            },
+                                          ),
+                                          title: Text(
+                                            '${car['make']} ${car['model']}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(car['type'], style: TextStyle(fontSize: 16)),
+                                              SizedBox(height: 3),
+                                              Text('MAD${car['price']}/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                          trailing: car['promotion']
+                                              ? Text('${car['percentage']}% Off', style: TextStyle(color: Colors.red))
+                                              : null,
+                                        ),
                                       ),
                                     );
                                   },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: 16),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.3),
-                                          spreadRadius: 1,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 17.0, horizontal: 16.0),
-                                      leading: FutureBuilder<Uint8List>(
-                                        future: _fetchImage(car['imageFileNames'][0]),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return CircularProgressIndicator();
-                                          } else if (snapshot.hasError) {
-                                            return Icon(Icons.error);
-                                          } else {
-                                            return Image.memory(snapshot.data!, width: 100, height: 60, fit: BoxFit.contain);
-                                          }
+                                ),
+                                if (_cars.length > 5)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
+                                    child: Center(
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.pushNamed(context, '/agencyCars');
                                         },
-                                      ),
-                                      title: Text(
-                                        '${car['make']} ${car['model']}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                        child: Text(
+                                          'See more',
+                                          style: TextStyle(fontSize: 16, color: Colors.blue),
                                         ),
                                       ),
-                                      subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(car['type'], style: TextStyle(fontSize: 16)),
-                                          SizedBox(height: 3),
-                                          Text('MAD${car['price']}/day', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                        ],
-                                      ),
-                                      trailing: car['promotion']
-                                          ? Text('${car['percentage']}% Off', style: TextStyle(color: Colors.red))
-                                          : null,
                                     ),
                                   ),
-                                );
-                              },
+                              ],
                             ),
                 ],
               ),
@@ -426,7 +454,10 @@ class _HomePageAgencyState extends State<HomePageAgency> {
               Navigator.pushNamed(context, '/agencyCars');
               break;
             case 2:
-              // Navigator.pushNamed(context, '/bookings'); // Add this route if it exists
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PendingBookingsPage()),  // Navigate to PendingBookingsPage
+            );// Add this route if it exists
               break;
             case 3:
               Navigator.pushNamed(context, '/profileAgency'); // Navigate to ProfilePage

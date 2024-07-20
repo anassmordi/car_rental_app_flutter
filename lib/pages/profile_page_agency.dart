@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login_page.dart'; // Add import for LoginPage
-import 'package:bghit_nsog/pages/privacy_policy_page.dart'; // Import the Privacy Policy page
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'login_page.dart';
+import 'package:bghit_nsog/pages/privacy_policy_page.dart';
 
 class ProfilePageAgency extends StatefulWidget {
   @override
@@ -10,11 +13,13 @@ class ProfilePageAgency extends StatefulWidget {
 
 class _ProfilePageAgencyState extends State<ProfilePageAgency> {
   String? agencyName;
+  String? profileImagePath;
 
   @override
   void initState() {
     super.initState();
     fetchAgencyName();
+    loadProfileImage();
   }
 
   Future<void> fetchAgencyName() async {
@@ -22,6 +27,34 @@ class _ProfilePageAgencyState extends State<ProfilePageAgency> {
     setState(() {
       agencyName = prefs.getString('userName');
     });
+  }
+
+  Future<void> loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      profileImagePath = prefs.getString('profileImagePath');
+    });
+  }
+
+  Future<void> pickAndSaveImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/images/pfps';
+      await Directory(path).create(recursive: true);
+      final fileName = 'profile_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '$path/$fileName';
+
+      final imageFile = File(pickedFile.path);
+      await imageFile.copy(filePath);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profileImagePath', filePath);
+
+      setState(() {
+        profileImagePath = filePath;
+      });
+    }
   }
 
   Future<void> logout(BuildContext context) async {
@@ -71,7 +104,7 @@ class _ProfilePageAgencyState extends State<ProfilePageAgency> {
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       body: Padding(
-        padding: const EdgeInsets.only(top: 0), // Adjust the top padding as needed
+        padding: const EdgeInsets.only(top: 0),
         child: Column(
           children: [
             AppBar(
@@ -94,17 +127,17 @@ class _ProfilePageAgencyState extends State<ProfilePageAgency> {
                       Stack(
                         children: [
                           CircleAvatar(
+                            backgroundColor: Colors.white,
                             radius: 70,
-                            backgroundImage: AssetImage('assets/agency_pfp.jpg'),
+                            backgroundImage: profileImagePath != null
+                                ? FileImage(File(profileImagePath!))
+                                : AssetImage('assets/agency_pfp.jpg') as ImageProvider,
                           ),
                           Positioned(
                             bottom: 0,
                             right: 0,
                             child: GestureDetector(
-                              onTap: () {
-                                // Handle pen icon tap
-                                // print("Pen icon tapped");
-                              },
+                              onTap: pickAndSaveImage,
                               child: CircleAvatar(
                                 radius: 20,
                                 backgroundColor: Color.fromARGB(255, 235, 235, 235),
@@ -116,7 +149,7 @@ class _ProfilePageAgencyState extends State<ProfilePageAgency> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        agencyName ?? 'Loading...', // Display the agency's name or a loading indicator
+                        agencyName ?? 'Loading...',
                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 6),
@@ -172,7 +205,7 @@ class _ProfilePageAgencyState extends State<ProfilePageAgency> {
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
-        currentIndex: 3, // Set to Profile
+        currentIndex: 3,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/homePageAgency');

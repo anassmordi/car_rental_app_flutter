@@ -1,16 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'terms_page.dart';
 
-
-
-
 class BookingPage extends StatefulWidget {
+  final String carId;
   final String imagePath;
   final String title;
   final String price;
 
   BookingPage({
+    required this.carId,
     required this.imagePath,
     required this.title,
     required this.price,
@@ -30,6 +31,22 @@ class _BookingPageState extends State<BookingPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userName = prefs.getString('userName');
+    if (userName != null && userName.contains(' ')) {
+      List<String> names = userName.split(' ');
+      _firstNameController.text = names[0];
+      _lastNameController.text = names.length > 1 ? names[1] : '';
+    }
+  }
+
   Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -44,11 +61,12 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-  void _navigateToDetailsPage() {
+  void _navigateToTermsPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailsPage(
+        builder: (context) => TermsPage(
+          carId: widget.carId,
           imagePath: widget.imagePath,
           title: widget.title,
           price: widget.price.replaceAll('MAD', '').trim(),
@@ -77,7 +95,7 @@ class _BookingPageState extends State<BookingPage> {
         ),
         backgroundColor: Color(0xFFF8F8F8),
         elevation: 0,
-        title: Text('Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
+        title: Text('Booking', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 24)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -103,7 +121,7 @@ class _BookingPageState extends State<BookingPage> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(widget.imagePath, height: 100, fit: BoxFit.contain),
+                        Image.file(File(widget.imagePath), height: 100, fit: BoxFit.contain),
                         SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -123,10 +141,6 @@ class _BookingPageState extends State<BookingPage> {
                       ],
                     ),
                     SizedBox(height: 16),
-                    Text(
-                      'Agency name\nAnass Mordi Company\n\nAgency address\nJamila 4 CD CASABLANCA',
-                      style: TextStyle(fontSize: 16),
-                    ),
                   ],
                 ),
               ),
@@ -338,7 +352,7 @@ class _BookingPageState extends State<BookingPage> {
               child: SizedBox(
                 width: 200,
                 child: ElevatedButton(
-                  onPressed: _navigateToDetailsPage,
+                  onPressed: _navigateToTermsPage,
                   child: Center(
                     child: Text(
                       'Next',
@@ -398,7 +412,8 @@ class _BookingPageState extends State<BookingPage> {
   }
 }
 
-class DetailsPage extends StatelessWidget {
+class DetailsCheckPage extends StatelessWidget {
+  final String carId;
   final String imagePath;
   final String title;
   final String price;
@@ -411,7 +426,8 @@ class DetailsPage extends StatelessWidget {
   final String phoneNumber;
   final String address;
 
-  DetailsPage({
+  DetailsCheckPage({
+    required this.carId,
     required this.imagePath,
     required this.title,
     required this.price,
@@ -432,7 +448,22 @@ class DetailsPage extends StatelessWidget {
   void _navigateToTermsPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TermsPage()),
+      MaterialPageRoute(
+        builder: (context) => TermsPage(
+          carId: carId,
+          imagePath: imagePath,
+          title: title,
+          price: price.replaceAll('MAD', '').trim(),
+          pickupDate: pickupDate,
+          returnDate: returnDate,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          cin: cin,
+          phoneNumber: phoneNumber,
+          address: address,
+        ),
+      ),
     );
   }
 
@@ -474,7 +505,7 @@ class DetailsPage extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(imagePath, height: 100, fit: BoxFit.contain),
+                        Image.file(File(imagePath), height: 100, fit: BoxFit.contain),
                         SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -494,8 +525,6 @@ class DetailsPage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 16),
-                    Text('Agency name: Anass Mordi Company'),
-                    Text('Agency address: Jamila 4 CD CASABLANCA'),
                     Text('Receipt date: $pickupDate'),
                     Text('Delivery date: $returnDate'),
                   ],
@@ -581,4 +610,3 @@ class DetailsPage extends StatelessWidget {
     );
   }
 }
-

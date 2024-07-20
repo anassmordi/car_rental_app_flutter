@@ -98,6 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Stack(
                         children: [
                           CircleAvatar(
+                            backgroundColor: Colors.white,
                             radius: 70,
                             backgroundImage: AssetImage('assets/profile_pic.jpg'),
                           ),

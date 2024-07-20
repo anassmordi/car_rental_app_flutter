@@ -96,7 +96,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             children: [
               Icon(Icons.check_circle, size: 100, color: Colors.green),
               SizedBox(height: 20),
-              Text('Information submitted successfully', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+              Text('Became an agency successfully', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
               SizedBox(height: 10),
             ],
           ),
